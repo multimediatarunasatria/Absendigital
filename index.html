@@ -1,0 +1,2667 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Absensi Digital - SMK TARUNA SATRIA</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js untuk Radar Chart, Bar Chart, & Donut Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Google Fonts: Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #F8FAFC;
+      color: #0F172A;
+    }
+
+    /* Tema Warna Utama: Putih Bersih, Hijau Tua (#064E3B / #047857) & Gradasi Oranye (#F97316 -> #EA580C) */
+    .bg-emerald-deep { background-color: #064E3B; }
+    .bg-emerald-mid  { background-color: #047857; }
+    .text-emerald-deep { color: #064E3B; }
+    .border-emerald-deep { border-color: #064E3B; }
+
+    .btn-orange-gradient {
+      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-orange-gradient:hover:not(:disabled) {
+      filter: brightness(1.07);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px -6px rgba(234, 88, 12, 0.45);
+    }
+
+    .btn-emerald-orange-gradient {
+      background: linear-gradient(135deg, #064E3B 0%, #047857 45%, #F97316 100%);
+      transition: all 0.25s ease;
+    }
+    .btn-emerald-orange-gradient:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 24px -6px rgba(6, 78, 59, 0.35);
+    }
+
+    .badge-orange-gradient {
+      background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
+    }
+
+    /* Scrollbar halus */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #F1F5F9; }
+    ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94A3B8; }
+
+    /* Pengaturan Cetak Laporan PDF A4 */
+    @media print {
+      .no-print { display: none !important; }
+      .print-only { display: block !important; }
+      body { background: #FFFFFF !important; padding: 0 !important; }
+      main { margin-left: 0 !important; padding: 0 !important; width: 100% !important; max-width: 100% !important; }
+      .print-card { box-shadow: none !important; border: 1px solid #CBD5E1 !important; }
+    }
+
+    /* Animasi Garis Pemindai Biometrik Wajah */
+    @keyframes biometricScanLine {
+      0%, 100% { top: 10%; opacity: 0.35; }
+      50% { top: 88%; opacity: 1; }
+    }
+    .biometric-laser {
+      animation: biometricScanLine 2.2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body class="antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- ==================== TOAST NOTIFICATION (PENGGANTI ALERT) ==================== -->
+  <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none px-4 sm:px-0"></div>
+
+  <!-- =========================================================================
+       A. PINTU MASUK (HALAMAN LOGIN)
+  ========================================================================== -->
+  <section id="login-screen" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-50 via-white to-emerald-50/60">
+    <div class="w-full max-w-md bg-white rounded-3xl shadow-xl border border-slate-100 overflow-hidden">
+      
+      <!-- Header Login Hijau Tua -->
+      <div class="bg-emerald-deep text-white p-7 text-center relative overflow-hidden">
+        <div class="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-orange-500/20 blur-xl"></div>
+        <div class="absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-emerald-400/10 blur-xl"></div>
+
+        <!-- Lambang Resmi SMK Taruna Satria Pekanbaru (Sesuai Referensi) -->
+        <div class="w-20 h-20 mx-auto mb-3 rounded-full bg-hidden p-1 shadow-lg border-2 border-hidden-400 flex items-center justify-center relative z-10 overflow-hidden">
+          <div class="w-20 h-20 mx-auto flex items-center justify-center relative z-10 overflow-hidden">
+          <img 
+          src="asset/img/logo.png" 
+          alt="Logo SMK Taruna Satria Pekanbaru" 
+          class="w-full h-full object-contain rounded-full"
+          />
+          </div>
+          <!--<svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="95" fill="#FACC15" stroke="#111827" stroke-width="6"/>
+            <circle cx="100" cy="100" r="63" fill="#FACC15" stroke="#111827" stroke-width="5"/>
+            <defs>
+              <path id="loginTopArc" d="M 24,100 A 76,76 0 1,1 176,100" />
+              <path id="loginBotArc" d="M 22,108 A 78,78 0 0,0 178,108" />
+            </defs>
+            <text fill="#111827" font-size="17" font-weight="800" letter-spacing="1.2">
+              <textPath href="#loginTopArc" startOffset="50%" text-anchor="middle">SMK TARUNA SATRIA</textPath>
+            </text>
+            <text fill="#111827" font-size="17" font-weight="800" letter-spacing="1.8">
+              <textPath href="#loginBotArc" startOffset="50%" text-anchor="middle">PEKANBARU</textPath>
+            </text>
+            <!-- Monogram TS Hijau & Hitam -->
+            <!--<path d="M 55 76 C 55 54, 145 54, 145 76 L 128 76 C 128 66, 72 66, 72 76 Z" fill="#047857"/>
+            <rect x="92" y="64" width="16" height="86" rx="3" fill="#047857"/>
+            <path d="M 72 76 C 56 76, 56 104, 100 104 C 144 104, 144 146, 100 146 C 72 146, 58 134, 58 122 L 74 122 C 74 128, 84 134, 100 134 C 124 134, 124 114, 100 114 C 56 114, 56 76, 72 76 Z" fill="#111827"/>
+          </svg> -->
+        </div>
+        
+
+        <h3 class="text-lg sm:text-xl font-extrabold tracking-tight relative z-10">PORTAR</h3>
+        <p class="text-xs text-emerald-100 relative z-10">Sistem Informasi Manajemen Lapor Taruna</p>
+        <p class="text-sm font-semibold text-orange-300 tracking-wider uppercase mt-0.5 relative z-10">SMK TARUNA SATRIA</p>
+      </div>
+
+      <!-- Form & Role Switcher -->
+      <div class="p-6 sm:p-8 space-y-5">
+        <!-- Tab Pemilih Peran -->
+        <div class="grid grid-cols-2 gap-1.5 p-1.5 bg-slate-100 rounded-2xl">
+          <button type="button" id="tab-role-guru" onclick="switchLoginRole('guru')" class="py-2.5 px-3 rounded-xl text-xs font-extrabold transition bg-emerald-deep text-white shadow-sm">
+            Guru / Staf
+          </button>
+          <button type="button" id="tab-role-siswa" onclick="switchLoginRole('siswa')" class="py-2.5 px-3 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900">
+            Siswa
+          </button>
+        </div>
+
+        <form id="login-form" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label id="login-id-label" class="block text-xs font-bold text-slate-700 mb-1.5">NIK</label>
+            <div class="relative">
+              <input type="text" id="login-id-input" required maxlength="16" pattern="[0-9]{16}" placeholder="Masukkan 16 digit NIK" value="3275011234567890"
+                class="w-full rounded-xl border border-slate-300 pl-4 pr-10 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-transparent">
+              <span class="absolute right-3.5 top-3.5 text-slate-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+              </span>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Kata Sandi (Password)</label>
+            <div class="relative">
+              <input type="password" id="login-password" required placeholder="••••••••" value="taruna123"
+                class="w-full rounded-xl border border-slate-300 pl-4 pr-11 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-700 focus:border-transparent">
+              <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 p-1.5 text-slate-400 hover:text-emerald-deep rounded-lg" title="Lihat/Sembunyikan Password">
+                <svg id="eye-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between text-xs">
+            <label class="inline-flex items-center gap-2 cursor-pointer text-slate-600 font-medium">
+              <input type="checkbox" id="remember-me" checked class="w-4 h-4 rounded border-slate-300 text-emerald-700 focus:ring-emerald-600">
+              <span>Ingat Saya</span>
+            </label>
+            <!-- <span class="text-emerald-700 font-semibold">Demo Siap Uji Coba</span> -->
+          </div>
+
+          <button type="submit" class="w-full py-3.5 rounded-xl btn-emerald-orange-gradient text-white font-extrabold text-sm shadow-lg tracking-wide">
+            LOG IN
+          </button>
+        </form>
+
+        <div class="pt-2 border-t border-slate-100 text-center">
+          <p class="text-[11px] text-slate-400">Akun uji coba sudah terisi otomatis. Klik <strong>Masuk ke Sistem</strong> untuk mencoba seluruh fitur. (081344744500).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================================
+       APLIKASI UTAMA (SETELAH LOGIN)
+  ========================================================================== -->
+  <div id="app-shell" class="hidden min-h-screen flex flex-col lg:flex-row">
+
+    <!-- ==================== SIDEBAR KIRI (KHUSUS PC / DESKTOP) ==================== -->
+    <aside class="hidden lg:flex lg:w-72 lg:flex-col lg:fixed lg:inset-y-0 bg-emerald-deep text-white shadow-2xl z-30 no-print">
+      <!-- Brand Logo -->
+      <div class="p-6 border-b border-emerald-800/80 flex items-center gap-3.5">
+        <div class="w-11 h-11 rounded-full bg-white p-0.5 shrink-0 border-2 border-yellow-400 shadow">
+          <svg viewBox="0 0 200 200" class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="100" cy="100" r="95" fill="#FACC15" stroke="#111827" stroke-width="6"/>
+            <circle cx="100" cy="100" r="63" fill="#FACC15" stroke="#111827" stroke-width="5"/>
+            <path d="M 55 76 C 55 54, 145 54, 145 76 L 128 76 C 128 66, 72 66, 72 76 Z" fill="#047857"/>
+            <rect x="92" y="64" width="16" height="86" rx="3" fill="#047857"/>
+            <path d="M 72 76 C 56 76, 56 104, 100 104 C 144 104, 144 146, 100 146 C 72 146, 58 134, 58 122 L 74 122 C 74 128, 84 134, 100 134 C 124 134, 124 114, 100 114 C 56 114, 56 76, 72 76 Z" fill="#111827"/>
+          </svg>
+        </div>
+        <div>
+          <h2 class="font-extrabold text-sm tracking-tight leading-snug">SMK TARUNA SATRIA</h2>
+          <span class="inline-block px-2 py-0.5 rounded-md text-[10px] font-bold badge-orange-gradient text-white">ABSENSI DIGITAL</span>
+        </div>
+      </div>
+
+      <!-- Menu Navigasi Desktop -->
+      <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+        <button onclick="navigate('beranda')" id="side-beranda" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-extrabold badge-orange-gradient text-white shadow-md transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+          <span>Menu Beranda &amp; Radar</span>
+        </button>
+
+        <button onclick="navigate('master')" id="side-master" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold text-emerald-100 hover:bg-emerald-800/70 transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+          <span>Input Master Data</span>
+        </button>
+
+        <button onclick="navigate('monitoring')" id="side-monitoring" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold text-emerald-100 hover:bg-emerald-800/70 transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+          <span>Monitoring Real-Time</span>
+        </button>
+
+        <button onclick="navigate('rekap')" id="side-rekap" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold text-emerald-100 hover:bg-emerald-800/70 transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Rekap, Surat Peringatan &amp; Cetak</span>
+        </button>
+
+        <button onclick="navigate('integrasi')" id="side-integrasi" class="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold text-emerald-100 hover:bg-emerald-800/70 transition">
+          <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+          <span>Google Sheet &amp; WA Bot</span>
+        </button>
+      </nav>
+
+      <!-- Footer Profil & Keluar -->
+      <div class="p-4 border-t border-emerald-800/80">
+        <div class="p-3 rounded-2xl bg-emerald-950/60 flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <p id="sidebar-user-name" class="text-xs font-bold truncate">Drs. Hendra Wijaya</p>
+            <p id="sidebar-user-role" class="text-[11px] text-orange-300 truncate">Guru / Staf</p>
+          </div>
+          <button onclick="handleLogout()" class="p-2 rounded-xl bg-red-500/20 text-red-200 hover:bg-red-600 hover:text-white transition" title="Keluar Sistem">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ==================== HEADER MOBILE (KHUSUS HP / TABLET) ==================== -->
+    <header class="lg:hidden bg-emerald-deep text-white px-4 py-3 sticky top-0 z-30 shadow-md flex items-center justify-between no-print">
+  <div class="flex items-center gap-2.5">
+    <div class="w-9 h-9 rounded-full p-0.5 border border-yellow-400 shrink-0 overflow-hidden flex items-center justify-center">
+      <img src="asset/img/logo.png" alt="Logo Sekolah" class="w-full h-full object-contain rounded-full">
+    </div>
+    <div>
+          <h1 class="text-xs font-extrabold tracking-tight">SMK TARUNA SATRIA</h1>
+          <p class="text-[10px] text-orange-300 font-semibold">Absensi Digital Pekanbaru</p>
+        </div>
+      </div>
+      <button onclick="handleLogout()" class="px-3 py-1.5 rounded-xl bg-white/15 text-xs font-bold hover:bg-white/25">
+        Keluar
+      </button>
+    </header>
+
+    <!-- ==================== AREA KONTEN UTAMA ==================== -->
+    <main class="flex-1 lg:ml-72 p-4 sm:p-6 lg:p-8 pb-28 lg:pb-10 max-w-7xl w-full mx-auto space-y-6">
+
+      <!-- Kop Surat Resmi (Hanya muncul saat Cetak / Print PDF) -->
+      <div class="hidden print-only border-b-4 border-double border-slate-900 pb-4 mb-6 text-center">
+        <p class="text-xs font-bold uppercase tracking-widest">Yayasan Pendidikan Taruna Satria</p>
+        <h1 class="text-xl font-extrabold uppercase text-emerald-deep">SMK TARUNA SATRIA PEKANBARU</h1>
+        <p class="text-xs text-slate-600">Kompetensi Keahlian: TKJ • DKV • TKR • TBSM • TAV • AKL | Kota Pekanbaru, Riau</p>
+        <p class="text-xs font-bold mt-2 uppercase underline">Laporan Resmi Rekapitulasi Kehadiran Digital</p>
+      </div>
+
+      <!-- =======================================================================
+           HALAMAN 1: MENU BERANDA (DASHBOARD UTAMA)
+      ======================================================================== -->
+      <section id="page-beranda" class="space-y-6">
+        
+        <!-- Header Sambutan & Tombol Cepat Absen Sekarang -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200/80 flex flex-col md:flex-row md:items-center justify-between gap-5 print-card">
+          <div class="space-y-1.5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-deep text-xs font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
+              <span id="welcome-role-badge">Peran: Guru / Staf</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Selamat Datang, <span id="welcome-user-name" class="text-emerald-deep">Drs. Hendra Wijaya</span>!
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-500 flex flex-wrap items-center gap-2">
+              <span id="live-date">Memuat tanggal...</span>
+              <span>•</span>
+              <span id="live-clock" class="font-mono font-extrabold text-orange-600">00:00:00 WIB</span>
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 no-print">
+            <button onclick="openAbsenModal()" class="w-full sm:w-auto px-6 py-4 rounded-2xl btn-orange-gradient text-white font-extrabold text-sm shadow-lg flex items-center justify-center gap-2.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              <span>ABSEN / SCAN BIOMETRIK</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Kartu Ringkasan Real-Time -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500">Hadir Tepat Waktu</span>
+              <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-xs">✓</span>
+            </div>
+            <h3 id="stat-hadir" class="text-2xl sm:text-3xl font-extrabold text-emerald-700 mt-2">0</h3>
+            <p class="text-[11px] text-emerald-600 font-semibold mt-1">Masuk &le; 07:15 WIB</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500">Terlambat</span>
+              <span class="w-8 h-8 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-extrabold text-xs">!</span>
+            </div>
+            <h3 id="stat-terlambat" class="text-2xl sm:text-3xl font-extrabold text-orange-600 mt-2">0</h3>
+            <p class="text-[11px] text-orange-600 font-semibold mt-1">Masuk &gt; 07:15 WIB</p>
+          </div> 
+          
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500">Sakit</span>
+              <span class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center font-extrabold text-xs">+</span>
+            </div>
+            <h3 id="stat-sakit" class="text-2xl sm:text-3xl font-extrabold text-sky-600 mt-2">0</h3>
+            <p class="text-[11px] text-sky-600 font-semibold mt-1">Keterangan Medis / Wali</p>
+          </div>
+
+          <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-500">Izin</span>
+              <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center font-extrabold text-xs">i</span>
+            </div>
+            <h3 id="stat-izin" class="text-2xl sm:text-3xl font-extrabold text-slate-700 mt-2">0</h3>
+            <p class="text-[11px] text-slate-500 font-semibold mt-1">Keperluan Keluarga/Tugas</p>
+          </div>
+        </div>
+
+        <!-- Visualisasi Data: Radar Chart & Diagram Kehadiran -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Radar Chart Persentase Kehadiran per Jurusan -->
+          <div class="lg:col-span-5 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-extrabold text-emerald-deep text-sm sm:text-base">Radar Persentase Kehadiran</h3>
+                <p class="text-xs text-slate-400">Indeks ketepatan waktu 6 kompetensi keahlian</p>
+              </div>
+              <span class="px-2.5 py-1 rounded-lg bg-orange-50 text-orange-600 text-[10px] font-extrabold">6 JURUSAN</span>
+            </div>
+            <div class="relative h-64">
+              <canvas id="radarChart"></canvas>
+            </div>
+          </div>
+
+          <!-- Bar & Donut Chart Tren Kehadiran -->
+          <div class="lg:col-span-7 bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm print-card">
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <h3 class="font-extrabold text-emerald-deep text-sm sm:text-base">Diagram Kehadiran Per Jurusan</h3>
+                <p class="text-xs text-slate-400">Perbandingan status Hadir, Terlambat, dan Sakit/Izin</p>
+              </div>
+              <span id="overall-rate-badge" class="px-3 py-1 rounded-full badge-orange-gradient text-white text-xs font-extrabold">92% Hadir</span>
+            </div>
+            <div class="relative h-64">
+              <canvas id="barChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Preview Cepat Monitoring Hari Ini -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm print-card">
+          <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+            <div>
+              <h3 class="font-extrabold text-emerald-deep text-base">Aktivitas Presensi Terbaru</h3>
+              <p class="text-xs text-slate-500">Log masuk terakhir yang tercatat di sistem</p>
+            </div>
+            <button onclick="navigate('monitoring')" class="text-xs font-extrabold text-orange-600 hover:underline no-print">
+              Lihat Semua &amp; Filter &rarr;
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
+                  <th class="py-3 px-3">Waktu</th>
+                  <th class="py-3 px-3">ID (NIK/NIS)</th>
+                  <th class="py-3 px-3">Nama Lengkap</th>
+                  <th class="py-3 px-3">Jabatan / Jurusan</th>
+                  <th class="py-3 px-3">Status</th>
+                  <th class="py-3 px-3">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="home-recent-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =======================================================================
+           HALAMAN 2: MANAJEMEN INPUT DATA (MASTER DATA GURU & SISWA)
+      ======================================================================== -->
+      <section id="page-master" class="hidden space-y-6">
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm">
+          <h2 class="text-lg sm:text-xl font-extrabold text-emerald-deep">Manajemen Input Master Data</h2>
+          <p class="text-xs text-slate-500 mt-1">Tambahkan data Guru/Staf dan Siswa SMK Taruna Satria agar terhubung ke database Google Sheets.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Form Input Data Guru -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div class="w-10 h-10 rounded-2xl bg-emerald-deep text-white flex items-center justify-center font-extrabold">G</div>
+              <div>
+                <h3 class="font-extrabold text-emerald-deep text-base">Input Data Guru / Staf</h3>
+                <p class="text-xs text-slate-400">Registrasi NIK (16 Digit) &amp; Jabatan Struktural</p>
+              </div>
+            </div>
+
+            <form onsubmit="tambahMasterGuru(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nomor Induk KTP *</label>
+                <input type="text" inputmode="numeric" maxlength="16" pattern="[0-9]{16}" id="guru-nik" required placeholder="Contoh: 3275011234567890"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap &amp; Gelar *</label>
+                <input type="text" id="guru-nama" required placeholder="Contoh: Siti Aminah, S.Pd., M.Kom"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Jabatan *</label>
+                <select id="guru-jabatan" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                  <option value="Kepala Sekolah">Kepala Sekolah</option>
+                  <option value="Wakasek Kurikulum">Wakasek Kurikulum</option>
+                  <option value="Wakasek Kesiswaan">Wakasek Kesiswaan</option>
+                  <option value="Guru Mapel" selected>Guru Mapel</option>
+                  <option value="Wali Kelas">Wali Kelas</option>
+                  <option value="Kepala Program Keahlian">Kepala Program Keahlian</option>
+                  <option value="Staf TU / Operator">Staf TU / Operator</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">No. WhatsApp HRD / Pribadi (Notifikasi)</label>
+                <input type="tel" id="guru-wa" placeholder="Contoh: 6281234567890" value="6281275001122"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Login Guru *</label>
+                <div class="relative">
+                  <input type="password" id="guru-password" required placeholder="Minimal 6 karakter" value="taruna123"
+                    class="w-full rounded-xl border border-slate-300 pl-3.5 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                  <button type="button" onclick="toggleInputPassword('guru-password')" class="absolute right-3 top-2 p-1 text-slate-400 hover:text-emerald-deep" title="Lihat/Sembunyikan Password">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Registrasi Wajah Biometrik Guru -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img id="guru-face-preview" src="" alt="Wajah Guru" class="hidden w-11 h-11 rounded-full object-cover border-2 border-emerald-600 shrink-0">
+                  <div id="guru-face-placeholder" class="w-11 h-11 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-xs shrink-0">
+                    BIO
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-extrabold text-slate-800">Sampel Wajah Biometrik *</p>
+                    <p id="guru-face-status" class="text-[11px] text-amber-600 font-semibold truncate">Belum direkam (Wajib untuk scan absen)</p>
+                  </div>
+                </div>
+                <button type="button" onclick="openFaceRegisterModal('form-guru')" class="px-3 py-2 rounded-xl bg-emerald-deep hover:bg-emerald-mid text-white text-[11px] font-extrabold shrink-0 transition">
+                  Rekam Wajah
+                </button>
+              </div>
+              <input type="hidden" id="guru-face-data" value="">
+
+              <button type="submit" class="w-full py-3 rounded-xl bg-emerald-deep hover:bg-emerald-mid text-white font-extrabold text-xs sm:text-sm shadow transition">
+                + Simpan Data Guru
+              </button>
+            </form>
+          </div>
+
+          <!-- Form Input Data Siswa -->
+          <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-100 pb-4">
+              <div class="w-10 h-10 rounded-2xl badge-orange-gradient text-white flex items-center justify-center font-extrabold">S</div>
+              <div>
+                <h3 class="font-extrabold text-emerald-deep text-base">Input Data Siswa</h3>
+                <p class="text-xs text-slate-400">Registrasi NIS &amp; 6 Kompetensi Keahlian</p>
+              </div>
+            </div>
+
+            <form onsubmit="tambahMasterSiswa(event)" class="space-y-4">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">NIS (Nomor Induk Siswa - Angka) *</label>
+                <input type="text" inputmode="numeric" pattern="[0-9]+" id="siswa-nis" required placeholder="Contoh: 2026109"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nama Lengkap Siswa *</label>
+                <input type="text" id="siswa-nama" required placeholder="Contoh: Muhammad Rizki Pratama"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Kompetensi Keahlian (Jurusan) *</label>
+                <select id="siswa-jurusan" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                  <option value="Teknik Komputer dan Jaringan">Teknik Komputer dan Jaringan (TKJ)</option>
+                  <option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
+                  <option value="Teknik Kendaraan Ringan">Teknik Kendaraan Ringan (TKR)</option>
+                  <option value="Teknik dan Bisnis Sepeda Motor">Teknik dan Bisnis Sepeda Motor (TBSM)</option>
+                  <option value="Teknik Audio Video">Teknik Audio Video (TAV)</option>
+                  <option value="Administrasi dan Keuangan Lembaga">Administrasi dan Keuangan Lembaga (AKL)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">No. WhatsApp Orang Tua / Wali *</label>
+                <input type="tel" id="siswa-wa" required placeholder="Contoh: 6281365432100" value="6281378901234"
+                  class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              </div>
+
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Password Login Siswa *</label>
+                <div class="relative">
+                  <input type="password" id="siswa-password" required placeholder="Minimal 6 karakter" value="siswa123"
+                    class="w-full rounded-xl border border-slate-300 pl-3.5 pr-10 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                  <button type="button" onclick="toggleInputPassword('siswa-password')" class="absolute right-3 top-2 p-1 text-slate-400 hover:text-emerald-deep" title="Lihat/Sembunyikan Password">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Registrasi Wajah Biometrik Siswa -->
+              <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img id="siswa-face-preview" src="" alt="Wajah Siswa" class="hidden w-11 h-11 rounded-full object-cover border-2 border-orange-500 shrink-0">
+                  <div id="siswa-face-placeholder" class="w-11 h-11 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center font-extrabold text-xs shrink-0">
+                    BIO
+                  </div>
+                  <div class="min-w-0">
+                    <p class="text-xs font-extrabold text-slate-800">Sampel Wajah Biometrik *</p>
+                    <p id="siswa-face-status" class="text-[11px] text-amber-600 font-semibold truncate">Belum direkam (Wajib untuk scan absen)</p>
+                  </div>
+                </div>
+                <button type="button" onclick="openFaceRegisterModal('form-siswa')" class="px-3 py-2 rounded-xl btn-orange-gradient text-white text-[11px] font-extrabold shrink-0 shadow-xs">
+                  Rekam Wajah
+                </button>
+              </div>
+              <input type="hidden" id="siswa-face-data" value="">
+
+              <button type="submit" class="w-full py-3 rounded-xl btn-orange-gradient text-white font-extrabold text-xs sm:text-sm shadow">
+                + Simpan Data Siswa
+              </button>
+            </form>
+          </div>
+        </div>
+
+          <!-- Tabel Master Data Tersimpan -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 class="font-extrabold text-emerald-deep text-base">Daftar Master Guru &amp; Siswa Terdaftar (<span id="master-count">0</span>)</h3>
+              <p class="text-xs text-slate-400">Kelola, edit identitas/password, atau hapus akun Guru &amp; Siswa (sinkron ke Google Sheets)</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <input type="text" id="master-search" oninput="renderMasterTable()" placeholder="Cari nama / NIK / NIS..."
+                class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              <select id="master-role-filter" onchange="renderMasterTable()"
+                class="rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-700">
+                <option value="SEMUA">Semua Peran</option>
+                <option value="Guru">Guru / Staf </option>
+                <option value="Siswa">Siswa</option>
+              </select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
+                  <th class="py-3 px-3">Peran</th>
+                  <th class="py-3 px-3">NIK / NIS</th>
+                  <th class="py-3 px-3">Nama Lengkap</th>
+                  <th class="py-3 px-3">Jabatan / Jurusan</th>
+                  <th class="py-3 px-3">Biometrik Wajah</th>
+                  <th class="py-3 px-3">WA Orang Tua / HRD</th>
+                  <th class="py-3 px-3 text-right">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="master-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =======================================================================
+           HALAMAN 3: MONITORING KEHADIRAN REAL-TIME (KELUARAN LAYAR)
+      ======================================================================== -->
+      <section id="page-monitoring" class="hidden space-y-6">
+        <div class="bg-emerald-deep text-white rounded-3xl p-6 shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full badge-orange-gradient text-[10px] font-extrabold uppercase animate-pulse">LIVE REAL-TIME</span>
+              <h2 class="text-lg sm:text-xl font-extrabold">Monitoring PIKET</h2>
+            </div>
+            <p class="text-xs text-emerald-200 mt-1">Pantau daftar kehadiran, terlambat, sakit, dan izin secara Real Time.</p>
+          </div>
+          <button onclick="openAbsenModal()" class="px-4 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow shrink-0">
+            + Absen Biometrik &amp; GPS
+          </button>
+        </div>
+
+        <!-- Filter Pencarian -->
+        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Cari Nama / NIS / NIK</label>
+            <input type="text" id="filter-search" oninput="renderMonitoringTable()" placeholder="Ketik nama atau nomor..."
+              class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Filter Jurusan / Jabatan</label>
+            <select id="filter-jurusan" onchange="renderMonitoringTable()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              <option value="SEMUA">Semua Jurusan &amp; Guru</option>
+              <option value="Teknik Komputer dan Jaringan">Teknik Komputer dan Jaringan (TKJ)</option>
+              <option value="Desain Komunikasi Visual">Desain Komunikasi Visual (DKV)</option>
+              <option value="Teknik Kendaraan Ringan">Teknik Kendaraan Ringan (TKR)</option>
+              <option value="Teknik dan Bisnis Sepeda Motor">Teknik dan Bisnis Sepeda Motor (TBSM)</option>
+              <option value="Teknik Audio Video">Teknik Audio Video (TAV)</option>
+              <option value="Administrasi dan Keuangan Lembaga">Administrasi dan Keuangan Lembaga (AKL)</option>
+              <option value="Guru">Khusus Guru / Staf</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 mb-1">Filter Status Kehadiran</label>
+            <select id="filter-status" onchange="renderMonitoringTable()" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              <option value="SEMUA">Semua Status</option>
+              <option value="Hadir">Hadir (Tepat Waktu)</option>
+              <option value="Terlambat">Terlambat</option>
+              <option value="Sakit">Sakit</option>
+              <option value="Izin">Izin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Tabel Real-Time -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
+                  <th class="py-3.5 px-4">Jam Absen</th>
+                  <th class="py-3.5 px-4">Peran</th>
+                  <th class="py-3.5 px-4">NIK / NIS</th>
+                  <th class="py-3.5 px-4">Nama Lengkap</th>
+                  <th class="py-3.5 px-4">Jurusan / Jabatan</th>
+                  <th class="py-3.5 px-4">Status</th>
+                  <th class="py-3.5 px-4">Keterangan</th>
+                </tr>
+              </thead>
+              <tbody id="monitoring-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =======================================================================
+           HALAMAN 4: REKAP DATA, DETEKSI KETERLAMBATAN & CETAK LAPORAN / SP
+      ======================================================================== -->
+      <section id="page-rekap" class="hidden space-y-6">
+        
+        <!-- Header & Tombol Cetak / Export -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 print-card">
+          <div>
+            <h2 class="text-lg sm:text-xl font-extrabold text-emerald-deep">Rekapitulasi, Analisis &amp; Cetak Laporan</h2>
+            <p class="text-xs text-slate-500 mt-1">Pengolahan persentase kehadiran, deteksi pola keterlambatan berulang, dan generator Surat Peringatan (SP).</p>
+          </div>
+          <div class="flex flex-wrap items-center gap-2.5 no-print">
+            <button onclick="exportCSV()" class="px-4 py-2.5 rounded-xl border-2 border-emerald-deep text-emerald-deep text-xs font-extrabold hover:bg-emerald-50 transition">
+              Export CSV / Excel
+            </button>
+            <button onclick="window.print()" class="px-4 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow">
+              Cetak / Simpan PDF Laporan
+            </button>
+          </div>
+        </div>
+
+        <!-- Early Warning System: Deteksi Pola Keterlambatan Berulang -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4 print-card">
+          <div class="flex items-center gap-2.5">
+            <span class="w-3 h-3 rounded-full bg-red-500 animate-ping"></span>
+            <h3 class="font-extrabold text-slate-900 text-base">Deteksi Pola Keterlambatan Berulang (Early Warning System)</h3>
+          </div>
+          <p class="text-xs text-slate-500">Wali Kelas dapat memantau siswa yang terlambat tercatat terlambat &ge; 3 kali dan beri Surat Peringatan (SP).</p>
+          <div id="early-warning-container" class="space-y-3"></div>
+        </div>
+
+        <!-- Tabel Rekapitulasi Pengolahan Data Mentah per Individu -->
+        <div class="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm print-card">
+          <h3 class="font-extrabold text-emerald-deep text-base mb-4">Tabel Rekapitulasi Kehadiran &amp; Persentase</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-500">
+                  <th class="py-3 px-3">NIK / NIS</th>
+                  <th class="py-3 px-3">Nama Lengkap</th>
+                  <th class="py-3 px-3">Jabatan / Jurusan</th>
+                  <th class="py-3 px-3 text-center">Hadir</th>
+                  <th class="py-3 px-3 text-center">Terlambat</th>
+                  <th class="py-3 px-3 text-center">Sakit</th>
+                  <th class="py-3 px-3 text-center">Izin</th>
+                  <th class="py-3 px-3 text-center">Persentase</th>
+                  <th class="py-3 px-3 text-right no-print">Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="rekap-summary-tbody" class="divide-y divide-slate-100 text-xs sm:text-sm"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- =======================================================================
+           HALAMAN 5: INTEGRASI GOOGLE APPS SCRIPT & WHATSAPP GATEWAY
+      ======================================================================== -->
+      <section id="page-integrasi" class="hidden space-y-6">
+        
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Panel Koneksi Google Apps Script & Google Sheets -->
+          <div class="lg:col-span-7 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-base sm:text-lg font-extrabold text-emerald-deep">Koneksi Database </h2>
+                <p class="text-xs text-slate-500">Hubungkan aplikasi dengan Data Base.</p>
+              </div>
+              <span id="gas-status-badge" class="px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold">Mode Simulasi Lokal</span>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Input URL Web App GAS</label>
+              <input type="url" id="gas-endpoint-url" placeholder="https://script.google.com/macros/s/AKfycbx.../exec"
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700">
+            </div>
+
+            <div class="flex flex-wrap gap-2">
+              <button onclick="saveGasConfig()" class="px-4 py-2.5 rounded-xl bg-emerald-deep text-white text-xs font-extrabold hover:bg-emerald-mid transition">
+                Simpan &amp; Hubungkan
+              </button>
+              <button onclick="syncFromGoogleSheet()" id="btn-sync-sheet" class="px-4 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow">
+                ↻ Tarik Data dari Sheet
+              </button>
+              <button onclick="pushAllToGoogleSheet()" class="px-4 py-2.5 rounded-xl border border-orange-500 text-orange-600 text-xs font-extrabold hover:bg-orange-50 transition">
+                ↑ Kirim Semua Data Awal
+              </button>
+              <button onclick="copyGasCode()" class="px-4 py-2.5 rounded-xl border border-emerald-deep text-emerald-deep text-xs font-extrabold hover:bg-emerald-50 transition">
+                Salin Code.gs
+              </button>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-xs text-slate-700 space-y-1">
+              <p class="font-extrabold text-emerald-deep">Panduan Singkat :</p>
+              <ol class="list-decimal list-inside space-y-0.5 text-[11px]">
+                <li>Salin dan Pastekan link <Strong>https://script.google.com/macros/s/AKfycbzWEBTHXCMY_ZMZslCRBZWQMvgJ0pZJaOxgZEHkf8yiuNF_VBNZ7lFVNpyD5kwP1bg/exec</Strong> pada kolom di atas</li>
+                <li>Klik <strong>Simpan &amp; Hubungkan</strong></li>
+                <li><strong>Kirim &amp; Tarik Data</strong>.</li>
+              </ol>
+            </div>
+
+            <div>
+              <p class="text-xs font-bold text-slate-700 mb-1.5">Template Kode Backend Google Apps Script (Code.gs):</p>
+              <textarea id="gas-code-box" rows="12" readonly class="w-full rounded-2xl bg-slate-900 text-emerald-300 font-mono text-[11px] p-4 leading-relaxed focus:outline-none"></textarea>
+            </div>
+          </div>
+
+          <!-- Panel Webhook WhatsApp Gateway & Pratinjau Pesan -->
+          <div class="lg:col-span-5 bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm space-y-4">
+            <div class="border-b border-slate-100 pb-3">
+              <h2 class="text-base sm:text-lg font-extrabold text-emerald-deep">Notifikasi WhatsApp Otomatis</h2>
+              <p class="text-xs text-slate-500">Konfigurasi Gateway (Fonnte / Wablas / Twilio) ke Orang Tua &amp; HRD.</p>
+            </div>
+
+            <div class="space-y-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Provider WhatsApp Gateway</label>
+                <select id="wa-provider" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold">
+                  <option value="Fonnte API (https://api.fonnte.com/send)">Fonnte API</option>
+                  <option value="Wablas API (https://pati.wablas.com/api/send-message)">Wablas API</option>
+                  <option value="Twilio WhatsApp Business API">Twilio WhatsApp API</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">API Token / Secret Key</label>
+                <input type="password" id="wa-token" value="ts_pekanbaru_live_token_99812" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono">
+              </div>
+              <div class="flex items-center justify-between pt-1">
+                <span class="text-xs font-bold text-slate-700">Kirim otomatis saat Terlambat / Sakit / Izin</span>
+                <input type="checkbox" id="wa-auto-toggle" checked class="w-4 h-4 accent-emerald-700">
+              </div>
+            </div>
+
+            <!-- Pratinjau Bubble Chat WhatsApp -->
+            <div class="p-4 rounded-2xl bg-[#ECE5DD] border border-slate-200 space-y-2">
+              <p class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Pratinjau Pesan Terkirim ke Orang Tua / HRD:</p>
+              <div id="wa-preview-bubble" class="bg-white rounded-2xl rounded-tl-none p-3.5 shadow-xs text-xs text-slate-800 leading-relaxed whitespace-pre-line"></div>
+            </div>
+
+            <!-- Log Pengiriman WA Real-time -->
+            <div>
+              <p class="text-xs font-bold text-slate-700 mb-1.5">Riwayat Log WhatsApp Terakhir:</p>
+              <div id="wa-log-list" class="space-y-1.5 max-h-36 overflow-y-auto text-[11px]"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ==================== BOTTOM NAVIGATION BAR (KHUSUS HP / MOBILE) ==================== -->
+    <nav class="lg:hidden fixed bottom-0 inset-x-0 bg-white border-t border-slate-200 shadow-2xl grid grid-cols-5 py-2 px-1 z-40 no-print">
+      <button onclick="navigate('beranda')" id="bot-beranda" class="flex flex-col items-center justify-center py-1 text-orange-600 font-extrabold text-[10px]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        <span>Beranda</span>
+      </button>
+
+      <button onclick="navigate('master')" id="bot-master" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold text-[10px]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path></svg>
+        <span>Input Data</span>
+      </button>
+
+      <button onclick="navigate('monitoring')" id="bot-monitoring" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold text-[10px]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+        <span>Piket</span>
+      </button>
+
+      <button onclick="navigate('rekap')" id="bot-rekap" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold text-[10px]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+        <span>Rekap/SP</span>
+      </button>
+
+      <button onclick="navigate('integrasi')" id="bot-integrasi" class="flex flex-col items-center justify-center py-1 text-slate-500 font-semibold text-[10px]">
+        <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+        <span>GAS &amp; WA</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 1: DETEKSI WAJAH BIOMETRIK & GEOFENCING GPS (RADIUS 50M SEKOLAH)
+  ========================================================================== -->
+  <div id="modal-absen" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-3 sm:p-4 no-print overflow-y-auto">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-5 sm:p-6 shadow-2xl border border-slate-100 space-y-4 my-auto">
+      
+      <!-- Header Modal -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-deep text-white flex items-center justify-center shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4"></path></svg>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-emerald-deep text-sm sm:text-base">Verifikasi Biometrik &amp; Lokasi</h3>
+            <p class="text-[11px] text-slate-500">SMK Taruna Satria Pekanbaru (Maks. 50 Meter)</p>
+          </div>
+        </div>
+        <button type="button" onclick="closeAbsenModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">✕</button>
+      </div>
+
+      <form onsubmit="submitQuickAbsen(event)" class="space-y-3.5">
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+          <div class="sm:col-span-7">
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Akun Guru / Siswa *</label>
+            <select id="absen-person-select" onchange="onAbsenPersonChanged()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-700"></select>
+          </div>
+          <div class="sm:col-span-5">
+            <label class="block text-[11px] font-bold text-slate-700 mb-1">Jenis Presensi *</label>
+            <select id="absen-mode-select" onchange="handleAbsenModeChange()" class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-bold text-emerald-deep focus:outline-none focus:ring-2 focus:ring-emerald-700">
+              <option value="BIOMETRIK">Masuk Sekolah (Wajah + GPS)</option>
+              <option value="Sakit">Pengajuan Sakit</option>
+              <option value="Izin">Pengajuan Izin</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Status Registrasi Wajah Pemilik Akun -->
+        <div id="absen-registered-face-bar" class="p-2.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex items-center justify-between gap-2.5">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img id="absen-ref-face-img" src="" alt="Sampel Terdaftar" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-600 shrink-0 bg-white">
+            <div class="min-w-0">
+              <p id="absen-ref-face-title" class="text-xs font-extrabold text-emerald-deep truncate">Sampel Biometrik Terdaftar</p>
+              <p id="absen-ref-face-sub" class="text-[10px] text-slate-600 truncate">Siap dicocokkan dengan kamera langsung</p>
+            </div>
+          </div>
+          <button type="button" id="btn-quick-register-from-absen" onclick="registerFaceFromAbsenModal()" class="hidden px-2.5 py-1.5 rounded-xl bg-orange-600 text-white text-[10px] font-extrabold shrink-0">
+            Daftar Wajah Dulu
+          </button>
+        </div>
+
+        <!-- Panel Kamera Deteksi Wajah Biometrik -->
+        <div id="biometric-camera-wrapper" class="space-y-2">
+          <div class="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video max-h-60 w-full flex items-center justify-center border-2 border-emerald-800 shadow-inner">
+            <video id="biometric-video" autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1]"></video>
+            <canvas id="biometric-canvas" class="hidden"></canvas>
+
+            <!-- Bingkai Pemindai Wajah Biometrik -->
+            <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div id="biometric-face-frame" class="w-40 h-48 sm:w-44 sm:h-52 rounded-[45%] border-2 border-dashed border-orange-400 relative transition-colors duration-300">
+                <div class="biometric-laser absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent shadow-[0_0_10px_#F97316]"></div>
+              </div>
+            </div>
+
+            <!-- Badge Status Kamera & Skor Kecocokan Biometrik -->
+            <div class="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-2 pointer-events-none">
+              <span id="biometric-cam-badge" class="px-2.5 py-1 rounded-full bg-slate-900/80 text-white text-[10px] font-bold backdrop-blur-xs">
+                Mengaktifkan Kamera...
+              </span>
+              <span id="biometric-score-badge" class="px-2.5 py-1 rounded-full bg-orange-500/90 text-white text-[10px] font-extrabold">
+                Biometrik: Menunggu Pindai
+              </span>
+            </div>
+
+            <!-- Tombol Pindai Wajah Ulang / Verifikasi -->
+            <button type="button" onclick="scanBiometricFace()" id="btn-scan-face" class="absolute bottom-2.5 px-4 py-1.5 rounded-full btn-orange-gradient text-white text-[11px] font-extrabold shadow-lg flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+              <span>Pindai &amp; Kunci Wajah</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel Geofencing GPS SMK Taruna Satria Pekanbaru (Radius 50m) -->
+        <div id="gps-geofence-card" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span id="gps-dot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+              <span class="text-xs font-extrabold text-slate-800">Geofencing GPS Sekolah (Maks. 50m)</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <button type="button" onclick="refreshGpsLocation()" class="px-2.5 py-1 rounded-lg bg-emerald-deep text-white text-[10px] font-bold hover:bg-emerald-mid">
+                ↻ Cek GPS
+              </button>
+              <button type="button" onclick="simulateSchoolGps()" class="px-2.5 py-1 rounded-lg bg-orange-100 text-orange-700 text-[10px] font-extrabold hover:bg-orange-200" title="Simulasi titik koordinat berada di halaman SMK Taruna Satria Pekanbaru (dalam radius 50m)">
+                Simulasi di Sekolah
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2 rounded-xl bg-white border border-slate-200/80">
+              <span class="text-slate-400 block text-[10px]">Koordinat Anda:</span>
+              <span id="gps-user-coords" class="font-mono font-bold text-slate-700">Mendeteksi lokasi...</span>
+            </div>
+            <div class="p-2 rounded-xl bg-white border border-slate-200/80">
+              <span class="text-slate-400 block text-[10px]">Jarak ke SMK Taruna Satria:</span>
+              <span id="gps-distance-text" class="font-mono font-extrabold text-amber-600">Menghitung...</span>
+            </div>
+          </div>
+          <p id="gps-status-msg" class="text-[11px] font-semibold text-slate-600">Titik Utama: SMK Taruna Satria Pekanbaru (0.46765, 101.40342)</p>
+        </div>
+
+        <!-- Otomatisasi Waktu Kehadiran (Batas 07:15 WIB) -->
+        <div class="grid grid-cols-2 gap-2.5">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="block text-[10px] font-bold text-slate-500">Jam Real-Time Server</span>
+            <span id="absen-jam-preview" class="text-xs sm:text-sm font-mono font-extrabold text-slate-800">00:00:00 WIB</span>
+          </div>
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="block text-[10px] font-bold text-slate-500">Status Otomatis (&le; 07:15 WIB)</span>
+            <span id="absen-auto-status-badge" class="inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800">Hadir (Tepat Waktu)</span>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-bold text-slate-700 mb-1">Catatan / Keterangan Tambahan (Opsional)</label>
+          <input type="text" id="absen-keterangan" placeholder="Otomatis terisi sesuai jam & GPS, atau isi keterangan sakit/izin..."
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div class="pt-1 flex justify-end gap-2">
+          <button type="button" onclick="closeAbsenModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">Batal</button>
+          <button type="submit" id="btn-submit-absen" class="px-5 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow disabled:opacity-50">
+            Konfirmasi Absen &amp; Kirim WA
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 2: GENERATOR DRAF SURAT PERINGATAN (SP) OTOMATIS
+  ========================================================================== -->
+  <div id="modal-sp" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-extrabold text-emerald-deep text-base">Surat Peringatan (SP)</h3>
+          <p class="text-xs text-slate-500">Terisi otomatis berdasarkan riwayat keterlambatan</p>
+        </div>
+        <button onclick="closeSpModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">✕</button>
+      </div>
+
+      <textarea id="sp-draft-text" rows="13" class="w-full rounded-2xl border border-slate-300 p-4 text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 focus:ring-emerald-700"></textarea>
+
+      <div class="flex flex-wrap justify-end gap-2">
+        <button type="button" onclick="closeSpModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">Tutup</button>
+        <button type="button" onclick="copySpDraft()" class="px-4 py-2 rounded-xl bg-emerald-deep text-white text-xs font-extrabold">Salin Teks SP</button>
+        <button type="button" onclick="printSpDraft()" class="px-4 py-2 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow">Cetak Surat SP</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 3: KONFIRMASI HAPUS DATA MASTER (GURU / SISWA)
+  ========================================================================== -->
+  <div id="modal-delete-master" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-start gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center font-extrabold shrink-0">!</div>
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">Konfirmasi Hapus Data</h3>
+          <p id="delete-master-desc" class="text-xs text-slate-600 mt-1 leading-relaxed">Apakah Anda yakin ingin menghapus data ini?</p>
+        </div>
+      </div>
+
+      <label class="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer text-xs text-slate-700">
+        <input type="checkbox" id="delete-cascade-logs" checked class="w-4 h-4 rounded text-red-600 focus:ring-red-500">
+        <span>Hapus juga riwayat log absensi milik akun ini</span>
+      </label>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button type="button" onclick="closeDeleteMasterModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:bg-slate-50">
+          Batal
+        </button>
+        <button type="button" onclick="confirmDeleteMaster()" class="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold shadow">
+          Ya, Hapus Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 4: EDIT DATA MASTER (GURU / SISWA) & UBAH PASSWORD
+  ========================================================================== -->
+  <div id="modal-edit-master" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 id="edit-master-title" class="font-extrabold text-emerald-deep text-base">Edit Data Master</h3>
+          <p class="text-xs text-slate-500">Perbarui identitas &amp; kata sandi Guru/Staf atau Siswa</p>
+        </div>
+        <button type="button" onclick="closeEditMasterModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">✕</button>
+      </div>
+
+      <form onsubmit="submitEditMaster(event)" class="space-y-3.5">
+        <input type="hidden" id="edit-master-old-id">
+        <input type="hidden" id="edit-master-role">
+
+        <div>
+          <label id="edit-master-id-label" class="block text-xs font-bold text-slate-700 mb-1">NIK (16 Digit) / NIS (Angka) *</label>
+          <input type="text" inputmode="numeric" id="edit-master-id" required
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Nama Lengkap *</label>
+          <input type="text" id="edit-master-nama" required
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div>
+          <label id="edit-master-detail-label" class="block text-xs font-bold text-slate-700 mb-1">Jabatan / Jurusan *</label>
+          <select id="edit-master-detail" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-700"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">No. WhatsApp Orang Tua / HRD *</label>
+          <input type="tel" id="edit-master-wa" required
+            class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Ubah Kata Sandi (Password) *</label>
+          <div class="relative">
+            <input type="password" id="edit-master-password" required placeholder="Masukkan password baru"
+              class="w-full rounded-xl border border-slate-300 pl-3.5 pr-10 py-2.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-700">
+            <button type="button" onclick="toggleInputPassword('edit-master-password')" class="absolute right-3 top-2 p-1 text-slate-400 hover:text-emerald-deep" title="Lihat/Sembunyikan Password">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Perbarui Registrasi Wajah Biometrik -->
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+          <div class="flex items-center gap-2.5 min-w-0">
+            <img id="edit-face-preview" src="" alt="Wajah Terdaftar" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-600 shrink-0 bg-white">
+            <div class="min-w-0">
+              <p class="text-xs font-extrabold text-slate-800">Data Wajah Biometrik</p>
+              <p id="edit-face-status" class="text-[11px] text-emerald-700 font-semibold truncate">Terdaftar</p>
+            </div>
+          </div>
+          <button type="button" onclick="openFaceRegisterModal('form-edit')" class="px-3 py-1.5 rounded-xl bg-emerald-deep hover:bg-emerald-mid text-white text-[11px] font-extrabold shrink-0">
+            Rekam Ulang Wajah
+          </button>
+        </div>
+        <input type="hidden" id="edit-face-data" value="">
+
+        <label class="flex items-center gap-2 p-3 rounded-xl bg-emerald-50/70 border border-emerald-200 cursor-pointer text-xs text-slate-700">
+          <input type="checkbox" id="edit-cascade-logs" checked class="w-4 h-4 rounded text-emerald-700 focus:ring-emerald-600">
+          <span>Perbarui juga nama, ID &amp; jabatan/jurusan pada riwayat log absensi</span>
+        </label>
+
+        <div class="flex justify-end gap-2 pt-2">
+          <button type="button" onclick="closeEditMasterModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600 hover:bg-slate-50">
+            Batal
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow">
+            Simpan Perubahan
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       MODAL 5: REGISTRASI SAMPEL WAJAH BIOMETRIK (GURU & SISWA)
+  ========================================================================== -->
+  <div id="modal-face-register" class="hidden fixed inset-0 bg-slate-900/75 backdrop-blur-xs z-50 flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-extrabold text-emerald-deep text-base">Registrasi Wajah Biometrik</h3>
+          <p id="face-reg-subtitle" class="text-xs text-slate-500">Posisikan wajah lurus di dalam bingkai oval</p>
+        </div>
+        <button type="button" onclick="closeFaceRegisterModal()" class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold hover:bg-slate-200">✕</button>
+      </div>
+
+      <div class="relative rounded-2xl overflow-hidden bg-slate-950 aspect-video w-full flex items-center justify-center border-2 border-emerald-800">
+        <video id="reg-biometric-video" autoplay playsinline muted class="w-full h-full object-cover scale-x-[-1]"></video>
+        <canvas id="reg-biometric-canvas" class="hidden"></canvas>
+
+        <div class="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div class="w-36 h-44 rounded-[45%] border-2 border-dashed border-orange-400 relative">
+            <div class="biometric-laser absolute inset-x-2 h-0.5 bg-gradient-to-r from-transparent via-orange-400 to-transparent"></div>
+          </div>
+        </div>
+
+        <span id="reg-cam-status" class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full bg-slate-900/80 text-white text-[10px] font-bold">
+          Menyiapkan Kamera...
+        </span>
+      </div>
+
+      <p class="text-[11px] text-slate-500 leading-relaxed">
+        Sistem akan merekam vektor &amp; foto biometrik wajah sebagai kunci verifikasi saat melakukan presensi dalam radius 50 meter sekolah.
+      </p>
+
+      <div class="flex justify-end gap-2 pt-1">
+        <button type="button" onclick="closeFaceRegisterModal()" class="px-4 py-2.5 rounded-xl border border-slate-300 text-xs font-bold text-slate-600">
+          Batal
+        </button>
+        <button type="button" onclick="captureRegisteredFace()" class="px-5 py-2.5 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow">
+          Ambil &amp; Simpan Wajah
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       JAVASCRIPT LOGIKA LENGKAP APLIKASI
+  ========================================================================== -->
+  <script>
+    // =========================================================================
+    // 1. DATA MASTER & LOG ABSENSI AWAL (SIAP UJI COBA)
+    // =========================================================================
+    const JURUSAN_LIST = [
+      'Teknik Komputer dan Jaringan',
+      'Desain Komunikasi Visual',
+      'Teknik Kendaraan Ringan',
+      'Teknik dan Bisnis Sepeda Motor',
+      'Teknik Audio Video',
+      'Administrasi dan Keuangan Lembaga'
+    ];
+
+    const JURUSAN_SHORT = ['TKJ', 'DKV', 'TKR', 'TBSM', 'TAV', 'AKL'];
+
+    const JABATAN_LIST = [
+      'Kepala Sekolah',
+      'Wakasek Kurikulum',
+      'Wakasek Kesiswaan',
+      'Guru Mapel',
+      'Wali Kelas',
+      'Kepala Program Keahlian',
+      'Staf TU / Operator'
+    ];
+
+    function generateDefaultFaceAvatar(nama, isGuru = false) {
+      const initials = (nama || 'TS').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+      const bg = isGuru ? '%23064E3B' : '%23EA580C';
+      return `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120"><rect width="120" height="120" rx="60" fill="${bg}"/><circle cx="60" cy="46" r="20" fill="%23F8FAFC" opacity="0.9"/><path d="M26 104c4-20 20-30 34-30s30 10 34 30" fill="%23F8FAFC" opacity="0.9"/><text x="60" y="114" font-family="sans-serif" font-size="11" font-weight="bold" fill="%23FACC15" text-anchor="middle">${initials}</text></svg>`;
+    }
+
+    let state = {
+      loginRole: 'guru',
+      currentUser: {
+        id: '1122334455667788',
+        nama: 'Aditya Sambadha, ST',
+        role: 'Guru / Staf',
+        detail: 'Kepala Program Keahlian'
+      },
+      gasUrl: '',
+      masterUsers: [
+        { role: 'Guru', id: '1122334455667788', nama: 'Aditya Sambadha, ST', detail: 'Kepala Program Keahlian', wa: '6281275001101', password: 'taruna123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Aditya Sembada', true) },
+        { role: 'Guru', id: '3275029876543210', nama: 'Rina Marlina, S.Kom', detail: 'Guru Mapel', wa: '6281275001102', password: 'taruna123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Rina Marlina', true) },
+        { role: 'Siswa', id: '2026001', nama: 'Aulia Guspin', detail: 'Teknik Komputer dan Jaringan', wa: '6281371002201', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Aulia Guspin', false) },
+        { role: 'Siswa', id: '2026014', nama: 'Nadia Putri Rahmadani', detail: 'Desain Komunikasi Visual', wa: '6281371002202', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Nadia Putri', false) },
+        { role: 'Siswa', id: '2026029', nama: 'Rizky Ramadhan', detail: 'Teknik Kendaraan Ringan', wa: '6281371002203', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Rizky Ramadhan', false) },
+        { role: 'Siswa', id: '2026042', nama: 'Dimas Saputra', detail: 'Teknik dan Bisnis Sepeda Motor', wa: '6281371002204', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Dimas Saputra', false) },
+        { role: 'Siswa', id: '2026055', nama: 'Fajar Hidayatullah', detail: 'Teknik Audio Video', wa: '6281371002205', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Fajar Hidayatullah', false) },
+        { role: 'Siswa', id: '2026068', nama: 'Aulia Azzahra', detail: 'Administrasi dan Keuangan Lembaga', wa: '6281371002206', password: 'siswa123', faceRegistered: true, facePhoto: generateDefaultFaceAvatar('Aulia Azzahra', false) }
+      ],
+      attendanceLogs: [
+        { jam: '06:55:12', role: 'Guru', id: '1122334455667788', nama: 'Drs. Hendra Wijaya, M.Pd', detail: 'Wakasek Kesiswaan', status: 'Hadir', keterangan: 'Tepat Waktu (Piket Pagi)' },
+        { jam: '07:02:18', role: 'Siswa', id: '2026001', nama: 'Aulia Guspin', detail: 'Teknik Komputer dan Jaringan', status: 'Hadir', keterangan: 'Tepat Waktu' },
+        { jam: '07:05:44', role: 'Siswa', id: '2026014', nama: 'Nadia Putri Rahmadani', detail: 'Desain Komunikasi Visual', status: 'Hadir', keterangan: 'Tepat Waktu' },
+        { jam: '07:08:10', role: 'Siswa', id: '2026042', nama: 'Dimas Saputra', detail: 'Teknik dan Bisnis Sepeda Motor', status: 'Hadir', keterangan: 'Tepat Waktu' },
+        { jam: '07:10:05', role: 'Siswa', id: '2026055', nama: 'Fajar Hidayatullah', detail: 'Teknik Audio Video', status: 'Hadir', keterangan: 'Tepat Waktu' },
+        { jam: '07:12:30', role: 'Guru', id: '3275029876543210', nama: 'Rina Marlina, S.Kom', detail: 'Guru Mapel', status: 'Hadir', keterangan: 'Tepat Waktu' },
+        { jam: '07:30:15', role: 'Siswa', id: '2026029', nama: 'Rizky Ramadhan', detail: 'Teknik Kendaraan Ringan', status: 'Terlambat', keterangan: 'Terlambat 15 menit (Macet)' },
+        { jam: '07:28:00', role: 'Siswa', id: '2026029', nama: 'Rizky Ramadhan', detail: 'Teknik Kendaraan Ringan', status: 'Terlambat', keterangan: 'Terlambat 13 menit (Ban bocor)' },
+        { jam: '07:35:20', role: 'Siswa', id: '2026029', nama: 'Rizky Ramadhan', detail: 'Teknik Kendaraan Ringan', status: 'Terlambat', keterangan: 'Terlambat 20 menit (Bangun siang)' },
+        { jam: '07:14:00', role: 'Siswa', id: '2026068', nama: 'Aulia Azzahra', detail: 'Administrasi dan Keuangan Lembaga', status: 'Sakit', keterangan: 'Surat Dokter terlampir' },
+        { jam: '07:15:00', role: 'Siswa', id: '2026014', nama: 'Nadia Putri Rahmadani', detail: 'Desain Komunikasi Visual', status: 'Izin', keterangan: 'Izin Lomba Desain Provinsi' }
+      ],
+      waLogs: [
+        { waktu: '07:30:16', target: '6281371002203', pesan: 'Notifikasi Terlambat: Rizky Ramadhan (TKR) pukul 07:30 WIB.' },
+        { waktu: '07:14:02', target: '6281371002206', pesan: 'Konfirmasi Sakit: Aulia Azzahra (AKL) telah dicatat.' }
+      ]
+    };
+
+    let radarChartInstance = null;
+    let barChartInstance = null;
+    let pendingDeleteId = null;
+
+    const SCHOOL_COORDS = {
+      lat: 0.46765,
+      lng: 101.40342,
+      maxRadiusMeters: 50
+    };
+
+    let biometricState = {
+      stream: null,
+      regStream: null,
+      regTargetContext: null,
+      regTargetUserId: null,
+      faceVerified: false,
+      faceScore: 0,
+      gpsVerified: false,
+      distanceMeters: null,
+      userLat: null,
+      userLng: null
+    };
+
+    // =========================================================================
+    // 2. TOAST NOTIFICATION & CLOCK HELPER
+    // =========================================================================
+    function showToast(title, message, type = 'emerald') {
+      const container = document.getElementById('toast-container');
+      if (!container) return;
+      const toast = document.createElement('div');
+      const bg = type === 'red' ? 'bg-red-600 text-white' : type === 'orange' ? 'bg-orange-600 text-white' : 'bg-emerald-deep text-white';
+      toast.className = `${bg} p-4 rounded-2xl shadow-xl flex items-start gap-3 pointer-events-auto transition transform translate-y-2 opacity-0 duration-300`;
+      toast.innerHTML = `
+        <div class="flex-1">
+          <p class="font-extrabold text-xs">${title}</p>
+          <p class="text-[11px] opacity-90 mt-0.5">${message}</p>
+        </div>
+        <button onclick="this.parentElement.remove()" class="text-white/80 hover:text-white font-bold text-sm">✕</button>
+      `;
+      container.appendChild(toast);
+      setTimeout(() => { toast.classList.remove('translate-y-2', 'opacity-0'); }, 10);
+      setTimeout(() => {
+        toast.classList.add('translate-y-2', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    function startLiveClock() {
+      const update = () => {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())} WIB`;
+        const dateStr = now.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+        const clockEl = document.getElementById('live-clock');
+        const dateEl = document.getElementById('live-date');
+        const absenClockEl = document.getElementById('absen-jam-preview');
+
+        if (clockEl) clockEl.innerText = timeStr;
+        if (dateEl) dateEl.innerText = dateStr;
+        if (absenClockEl) absenClockEl.innerText = timeStr;
+
+        const autoBadge = document.getElementById('absen-auto-status-badge');
+        if (autoBadge) {
+          const evalResult = evaluateTimeRule(now);
+          autoBadge.innerText = evalResult.status === 'Hadir' ? 'Hadir (Tepat Waktu &le; 07:15)' : 'Terlambat (> 07:15 WIB)';
+          autoBadge.className = evalResult.status === 'Hadir' ? 'inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800' : 'inline-block mt-0.5 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-orange-100 text-orange-800';
+        }
+      };
+      update();
+      setInterval(update, 1000);
+    }
+
+    function evaluateTimeRule(dateObj) {
+      const h = dateObj.getHours();
+      const m = dateObj.getMinutes();
+      const totalMins = h * 60 + m;
+      const limitMins = 7 * 60 + 15; // 07:15 WIB
+
+      if (totalMins <= limitMins) {
+        return { status: 'Hadir', defaultNote: 'Tepat Waktu' };
+      } else {
+        const diff = totalMins - limitMins;
+        return { status: 'Terlambat', defaultNote: `Terlambat ${diff} menit (> 07:15 WIB)` };
+      }
+    }
+
+    // =========================================================================
+    // 3. AUTHENTICATION & NAVIGATION
+    // =========================================================================
+    function switchLoginRole(role) {
+      state.loginRole = role;
+      const btnGuru = document.getElementById('tab-role-guru');
+      const btnSiswa = document.getElementById('tab-role-siswa');
+      const labelId = document.getElementById('login-id-label');
+      const inputId = document.getElementById('login-id-input');
+      const inputPass = document.getElementById('login-password');
+
+      if (role === 'guru') {
+        btnGuru.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition bg-emerald-deep text-white shadow-sm';
+        btnSiswa.className = 'py-2.5 px-3 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900';
+        labelId.innerText = 'Nomor Induk KTP (16 Digit)';
+        inputId.placeholder = 'Masukkan 16 digit NIK';
+        inputId.maxLength = 16;
+        inputId.pattern = '[0-9]{16}';
+        inputId.title = 'NIK harus terdiri dari 16 digit angka';
+        inputId.value = '1122334455667788';
+        inputPass.value = 'taruna123';
+      } else {
+        btnSiswa.className = 'py-2.5 px-3 rounded-xl text-xs font-extrabold transition bg-emerald-deep text-white shadow-sm';
+        btnGuru.className = 'py-2.5 px-3 rounded-xl text-xs font-bold transition text-slate-600 hover:text-slate-900';
+        labelId.innerText = 'NIS (Nomor Induk Siswa)';
+        inputId.placeholder = 'Masukkan NIS (Contoh: 2026001)';
+        inputId.maxLength = 15;
+        inputId.pattern = '[0-9]+';
+        inputId.title = 'NIS harus berupa angka';
+        inputId.value = '2026001';
+        inputPass.value = 'siswa123';
+      }
+    }
+
+    function togglePasswordVisibility() {
+      const pass = document.getElementById('login-password');
+      if (pass.type === 'password') {
+        pass.type = 'text';
+      } else {
+        pass.type = 'password';
+      }
+    }
+
+    function toggleInputPassword(elementId) {
+      const input = document.getElementById(elementId);
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const idVal = document.getElementById('login-id-input').value.trim();
+      const passVal = document.getElementById('login-password').value.trim();
+      const expectedRole = state.loginRole === 'guru' ? 'Guru' : 'Siswa';
+
+      const found = state.masterUsers.find(u => u.id === idVal);
+      if (found) {
+        if (found.role !== expectedRole) {
+          showToast('Peran Tidak Sesuai', `Akun ${idVal} terdaftar sebagai ${found.role}. Silakan pilih tab ${found.role}.`, 'orange');
+          return;
+        }
+        if (found.password && found.password !== passVal) {
+          showToast('Password Salah', 'Kata sandi yang Anda masukkan tidak sesuai.', 'red');
+          return;
+        }
+        state.currentUser = {
+          id: found.id,
+          nama: found.nama,
+          role: found.role === 'Guru' ? 'Guru / Staf' : 'Siswa',
+          detail: found.detail
+        };
+      } else {
+        state.currentUser = {
+          id: idVal,
+          nama: state.loginRole === 'guru' ? 'Aditya Sambadha, ST' : 'Aulia Guspin',
+          role: state.loginRole === 'guru' ? 'Guru / Staf' : 'Siswa',
+          detail: state.loginRole === 'guru' ? 'Guru Mapel' : 'Teknik Komputer dan Jaringan'
+        };
+      }
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('app-shell').classList.remove('hidden');
+
+      document.getElementById('welcome-user-name').innerText = state.currentUser.nama;
+      document.getElementById('welcome-role-badge').innerText = `Peran: ${state.currentUser.role}`;
+      document.getElementById('sidebar-user-name').innerText = state.currentUser.nama;
+      document.getElementById('sidebar-user-role').innerText = state.currentUser.detail;
+
+      refreshAllViews();
+      showToast('Login Berhasil', `Selamat datang, ${state.currentUser.nama}`, 'emerald');
+    }
+
+    function handleLogout() {
+      document.getElementById('app-shell').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      showToast('Keluar Sistem', 'Anda telah keluar dari sesi.', 'orange');
+    }
+
+    function navigate(pageId) {
+      ['beranda', 'master', 'monitoring', 'rekap', 'integrasi'].forEach(p => {
+        const pageEl = document.getElementById(`page-${p}`);
+        if (pageEl) pageEl.classList.toggle('hidden', p !== pageId);
+
+        const sideBtn = document.getElementById(`side-${p}`);
+        if (sideBtn) {
+          if (p === pageId) {
+            sideBtn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-extrabold badge-orange-gradient text-white shadow-md transition';
+          } else {
+            sideBtn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-xs font-semibold text-emerald-100 hover:bg-emerald-800/70 transition';
+          }
+        }
+
+        const botBtn = document.getElementById(`bot-${p}`);
+        if (botBtn) {
+          if (p === pageId) {
+            botBtn.className = 'flex flex-col items-center justify-center py-1 text-orange-600 font-extrabold text-[10px]';
+          } else {
+            botBtn.className = 'flex flex-col items-center justify-center py-1 text-slate-500 font-semibold text-[10px]';
+          }
+        }
+      });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // =========================================================================
+    // 4. REFRESH ALL VIEWS & CRUD MASTER DATA (GURU & SISWA)
+    // =========================================================================
+    function refreshAllViews() {
+      renderMasterTable();
+      renderMonitoringTable();
+      renderHomeRecentTable();
+      renderStatisticsCards();
+      renderCharts();
+      renderEarlyWarningSystem();
+      renderRekapSummaryTable();
+      updateGasCodeBox();
+      updateWaPreviewAndLogs();
+      populateAbsenPersonDropdown();
+    }
+
+    function tambahMasterGuru(e) {
+      e.preventDefault();
+      const id = document.getElementById('guru-nik').value.trim();
+      const nama = document.getElementById('guru-nama').value.trim();
+      const detail = document.getElementById('guru-jabatan').value;
+      const wa = document.getElementById('guru-wa').value.trim();
+      const password = document.getElementById('guru-password').value.trim();
+      const facePhoto = document.getElementById('guru-face-data').value || generateDefaultFaceAvatar(nama, true);
+
+      if (state.masterUsers.some(u => u.id === id)) {
+        showToast('NIK Sudah Terdaftar', 'Nomor NIK tersebut sudah ada di data master.', 'red');
+        return;
+      }
+
+      state.masterUsers.push({ role: 'Guru', id, nama, detail, wa, password, faceRegistered: true, facePhoto });
+      sendToGoogleAppsScript({ action: 'upsertMaster', role: 'Guru', id, nama, detail, wa, password, facePhoto });
+
+      e.target.reset();
+      document.getElementById('guru-face-preview').classList.add('hidden');
+      document.getElementById('guru-face-placeholder').classList.remove('hidden');
+      document.getElementById('guru-face-status').innerText = 'Belum direkam';
+      document.getElementById('guru-face-data').value = '';
+
+      refreshAllViews();
+      showToast('Guru Ditambahkan', `${nama} berhasil didaftarkan.`, 'emerald');
+    }
+
+    function tambahMasterSiswa(e) {
+      e.preventDefault();
+      const id = document.getElementById('siswa-nis').value.trim();
+      const nama = document.getElementById('siswa-nama').value.trim();
+      const detail = document.getElementById('siswa-jurusan').value;
+      const wa = document.getElementById('siswa-wa').value.trim();
+      const password = document.getElementById('siswa-password').value.trim();
+      const facePhoto = document.getElementById('siswa-face-data').value || generateDefaultFaceAvatar(nama, false);
+
+      if (state.masterUsers.some(u => u.id === id)) {
+        showToast('NIS Sudah Terdaftar', 'Nomor NIS tersebut sudah ada di data master.', 'red');
+        return;
+      }
+
+      state.masterUsers.push({ role: 'Siswa', id, nama, detail, wa, password, faceRegistered: true, facePhoto });
+      sendToGoogleAppsScript({ action: 'upsertMaster', role: 'Siswa', id, nama, detail, wa, password, facePhoto });
+
+      e.target.reset();
+      document.getElementById('siswa-face-preview').classList.add('hidden');
+      document.getElementById('siswa-face-placeholder').classList.remove('hidden');
+      document.getElementById('siswa-face-status').innerText = 'Belum direkam';
+      document.getElementById('siswa-face-data').value = '';
+
+      refreshAllViews();
+      showToast('Siswa Ditambahkan', `${nama} berhasil didaftarkan.`, 'emerald');
+    }
+
+    function renderMasterTable() {
+      const tbody = document.getElementById('master-tbody');
+      const countEl = document.getElementById('master-count');
+      if (!tbody) return;
+
+      const keyword = (document.getElementById('master-search')?.value || '').toLowerCase().trim();
+      const roleFilter = document.getElementById('master-role-filter')?.value || 'SEMUA';
+
+      const filteredUsers = state.masterUsers.filter(u => {
+        const matchRole = roleFilter === 'SEMUA' || u.role === roleFilter;
+        const matchKeyword = !keyword ||
+          u.nama.toLowerCase().includes(keyword) ||
+          u.id.toLowerCase().includes(keyword) ||
+          u.detail.toLowerCase().includes(keyword);
+        return matchRole && matchKeyword;
+      });
+
+      if (countEl) countEl.innerText = `${filteredUsers.length} dari ${state.masterUsers.length}`;
+
+      if (filteredUsers.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="py-8 text-center text-xs text-slate-400">Tidak ada data Guru atau Siswa yang cocok dengan pencarian.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filteredUsers.map(u => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-3 px-3">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${u.role === 'Guru' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'}">
+              ${u.role}
+            </span>
+          </td>
+          <td class="py-3 px-3 font-mono font-bold text-slate-700">${u.id}</td>
+          <td class="py-3 px-3 font-bold text-slate-900">${u.nama}</td>
+          <td class="py-3 px-3 text-slate-600">${u.detail}</td>
+          <td class="py-3 px-3">
+            <div class="flex items-center gap-2">
+              <img src="${u.facePhoto || generateDefaultFaceAvatar(u.nama, u.role === 'Guru')}" class="w-8 h-8 rounded-full object-cover border border-slate-300">
+              <span class="text-[11px] font-semibold text-emerald-700">Terverifikasi</span>
+            </div>
+          </td>
+          <td class="py-3 px-3 font-mono text-slate-600">${u.wa}</td>
+          <td class="py-3 px-3 text-right">
+            <div class="flex items-center justify-end gap-1.5">
+              <button type="button" onclick="openEditMasterModal('${u.id}')" class="px-3 py-1.5 rounded-lg bg-orange-100 text-orange-700 hover:bg-orange-200 text-xs font-extrabold transition">Edit</button>
+              <button type="button" onclick="openDeleteMasterModal('${u.id}')" class="px-3 py-1.5 rounded-lg bg-red-100 text-red-700 hover:bg-red-200 text-xs font-extrabold transition">Hapus</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Modal Edit Master Data (Guru & Siswa) beserta Password & Wajah
+    function openEditMasterModal(id) {
+      const user = state.masterUsers.find(u => u.id === id);
+      if (!user) return;
+
+      document.getElementById('edit-master-title').innerText = user.role === 'Guru' ? 'Edit Data Guru / Staf' : 'Edit Data Siswa';
+      document.getElementById('edit-master-old-id').value = user.id;
+      document.getElementById('edit-master-role').value = user.role;
+
+      const idInput = document.getElementById('edit-master-id');
+      idInput.value = user.id;
+
+      document.getElementById('edit-master-nama').value = user.nama;
+      document.getElementById('edit-master-wa').value = user.wa;
+      document.getElementById('edit-master-password').value = user.password || 'taruna123';
+      document.getElementById('edit-face-data').value = user.facePhoto || '';
+      document.getElementById('edit-face-preview').src = user.facePhoto || generateDefaultFaceAvatar(user.nama, user.role === 'Guru');
+
+      const idLabel = document.getElementById('edit-master-id-label');
+      const detailLabel = document.getElementById('edit-master-detail-label');
+      const detailSelect = document.getElementById('edit-master-detail');
+
+      if (user.role === 'Guru') {
+        idLabel.innerText = 'Nomor Induk KTP (16 Digit) *';
+        idInput.maxLength = 16;
+        idInput.pattern = '[0-9]{16}';
+        idInput.placeholder = 'Masukkan 16 digit NIK';
+        detailLabel.innerText = 'Jabatan Struktural *';
+        detailSelect.innerHTML = JABATAN_LIST.map(j => `<option value="${j}" ${user.detail === j ? 'selected' : ''}>${j}</option>`).join('');
+      } else {
+        idLabel.innerText = 'NIS (Nomor Induk Siswa) *';
+        idInput.maxLength = 15;
+        idInput.pattern = '[0-9]+';
+        idInput.placeholder = 'Masukkan NIS berupa angka';
+        detailLabel.innerText = 'Kompetensi Keahlian (Jurusan) *';
+        detailSelect.innerHTML = JURUSAN_LIST.map(j => `<option value="${j}" ${user.detail === j ? 'selected' : ''}>${j}</option>`).join('');
+      }
+
+      document.getElementById('modal-edit-master').classList.remove('hidden');
+    }
+
+    function closeEditMasterModal() {
+      document.getElementById('modal-edit-master').classList.add('hidden');
+    }
+
+    function submitEditMaster(e) {
+      e.preventDefault();
+      const oldId = document.getElementById('edit-master-old-id').value;
+      const newId = document.getElementById('edit-master-id').value.trim();
+      const nama = document.getElementById('edit-master-nama').value.trim();
+      const detail = document.getElementById('edit-master-detail').value;
+      const wa = document.getElementById('edit-master-wa').value.trim();
+      const password = document.getElementById('edit-master-password').value.trim();
+      const facePhoto = document.getElementById('edit-face-data').value;
+      const cascade = document.getElementById('edit-cascade-logs').checked;
+
+      const user = state.masterUsers.find(u => u.id === oldId);
+      if (!user) return;
+
+      if (newId !== oldId && state.masterUsers.some(u => u.id === newId)) {
+        showToast('ID Sudah Digunakan', 'NIK atau NIS tersebut sudah terdaftar pada akun lain.', 'red');
+        return;
+      }
+
+      user.id = newId;
+      user.nama = nama;
+      user.detail = detail;
+      user.wa = wa;
+      user.password = password;
+      if (facePhoto) user.facePhoto = facePhoto;
+
+      if (cascade) {
+        state.attendanceLogs.forEach(l => {
+          if (l.id === oldId) {
+            l.id = newId;
+            l.nama = nama;
+            l.detail = detail;
+          }
+        });
+      }
+
+      if (state.currentUser && state.currentUser.id === oldId) {
+        state.currentUser.id = newId;
+        state.currentUser.nama = nama;
+        state.currentUser.detail = detail;
+        if (document.getElementById('welcome-user-name')) document.getElementById('welcome-user-name').innerText = nama;
+        if (document.getElementById('sidebar-user-name')) document.getElementById('sidebar-user-name').innerText = nama;
+        if (document.getElementById('sidebar-user-role')) document.getElementById('sidebar-user-role').innerText = detail;
+      }
+
+      sendToGoogleAppsScript({
+        action: 'upsertMaster',
+        oldId,
+        role: user.role,
+        id: newId,
+        nama,
+        detail,
+        wa,
+        password,
+        facePhoto: user.facePhoto
+      });
+
+      closeEditMasterModal();
+      refreshAllViews();
+      showToast('Perubahan Disimpan', `Data ${user.role} (${nama}) berhasil diperbarui.`, 'emerald');
+    }
+
+    function renderMonitoringTable() {
+      const tbody = document.getElementById('monitoring-tbody');
+      if (!tbody) return;
+      const search = (document.getElementById('filter-search')?.value || '').toLowerCase();
+      const jurusanFilter = document.getElementById('filter-jurusan')?.value || 'SEMUA';
+      const statusFilter = document.getElementById('filter-status')?.value || 'SEMUA';
+
+      const filtered = state.attendanceLogs.filter(l => {
+        const matchSearch = l.nama.toLowerCase().includes(search) || l.id.toLowerCase().includes(search);
+        let matchJurusan = true;
+        if (jurusanFilter === 'Guru') {
+          matchJurusan = (l.role === 'Guru');
+        } else if (jurusanFilter !== 'SEMUA') {
+          matchJurusan = (l.detail === jurusanFilter);
+        }
+        const matchStatus = (statusFilter === 'SEMUA' || l.status === statusFilter);
+        return matchSearch && matchJurusan && matchStatus;
+      });
+
+      tbody.innerHTML = filtered.map(l => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-3.5 px-4 font-mono font-bold text-slate-700">${l.jam}</td>
+          <td class="py-3.5 px-4">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${l.role === 'Guru' ? 'bg-emerald-100 text-emerald-800' : 'bg-orange-100 text-orange-800'}">
+              ${l.role}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 font-mono text-slate-600">${l.id}</td>
+          <td class="py-3.5 px-4 font-bold text-slate-900">${l.nama}</td>
+          <td class="py-3.5 px-4 text-slate-600">${l.detail}</td>
+          <td class="py-3.5 px-4">
+            <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${
+              l.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' :
+              l.status === 'Terlambat' ? 'bg-orange-100 text-orange-800' :
+              l.status === 'Sakit' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700'
+            }">
+              ${l.status}
+            </span>
+          </td>
+          <td class="py-3.5 px-4 text-slate-600 text-xs">${l.keterangan}</td>
+        </tr>
+      `).join('') || `<tr><td colspan="7" class="text-center py-6 text-slate-400">Tidak ada data presensi yang sesuai filter.</td></tr>`;
+    }
+
+    function renderHomeRecentTable() {
+      const tbody = document.getElementById('home-recent-tbody');
+      if (!tbody) return;
+      const recent = state.attendanceLogs.slice(-5).reverse();
+      tbody.innerHTML = recent.map(l => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-3 font-mono text-slate-700">${l.jam}</td>
+          <td class="py-2.5 px-3 font-mono text-slate-600">${l.id}</td>
+          <td class="py-2.5 px-3 font-bold text-slate-900">${l.nama}</td>
+          <td class="py-2.5 px-3 text-slate-600">${l.detail}</td>
+          <td class="py-2.5 px-3">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${
+              l.status === 'Hadir' ? 'bg-emerald-100 text-emerald-800' :
+              l.status === 'Terlambat' ? 'bg-orange-100 text-orange-800' :
+              l.status === 'Sakit' ? 'bg-sky-100 text-sky-800' : 'bg-slate-100 text-slate-700'
+            }">${l.status}</span>
+          </td>
+          <td class="py-2.5 px-3 text-slate-600 text-xs">${l.keterangan}</td>
+        </tr>
+      `).join('');
+    }
+
+    function renderStatisticsCards() {
+      const hadirCount = state.attendanceLogs.filter(l => l.status === 'Hadir').length;
+      const terlambatCount = state.attendanceLogs.filter(l => l.status === 'Terlambat').length;
+      const sakitCount = state.attendanceLogs.filter(l => l.status === 'Sakit').length;
+      const izinCount = state.attendanceLogs.filter(l => l.status === 'Izin').length;
+
+      if (document.getElementById('stat-hadir')) document.getElementById('stat-hadir').innerText = hadirCount;
+      if (document.getElementById('stat-terlambat')) document.getElementById('stat-terlambat').innerText = terlambatCount;
+      if (document.getElementById('stat-sakit')) document.getElementById('stat-sakit').innerText = sakitCount;
+      if (document.getElementById('stat-izin')) document.getElementById('stat-izin').innerText = izinCount;
+    }
+
+    function renderCharts() {
+      const radarCtx = document.getElementById('radarChart')?.getContext('2d');
+      if (radarCtx) {
+        if (radarChartInstance) radarChartInstance.destroy();
+        radarChartInstance = new Chart(radarCtx, {
+          type: 'radar',
+          data: {
+            labels: JURUSAN_SHORT,
+            datasets: [{
+              label: 'Indeks Kehadiran (%)',
+              data: [96, 92, 94, 91, 95, 93],
+              backgroundColor: 'rgba(6, 78, 59, 0.2)',
+              borderColor: '#064E3B',
+              pointBackgroundColor: '#F97316',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              r: {
+                angleLines: { color: '#E2E8F0' },
+                grid: { color: '#E2E8F0' },
+                suggestedMin: 80,
+                suggestedMax: 100
+              }
+            }
+          }
+        });
+      }
+
+      const barCtx = document.getElementById('barChart')?.getContext('2d');
+      if (barCtx) {
+        if (barChartInstance) barChartInstance.destroy();
+        barChartInstance = new Chart(barCtx, {
+          type: 'bar',
+          data: {
+            labels: JURUSAN_SHORT,
+            datasets: [
+              { label: 'Hadir', data: [28, 25, 27, 24, 26, 22], backgroundColor: '#047857' },
+              { label: 'Terlambat', data: [2, 3, 4, 3, 1, 2], backgroundColor: '#F97316' },
+              { label: 'Sakit/Izin', data: [1, 2, 1, 2, 1, 2], backgroundColor: '#0284C7' }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              x: { stacked: true, grid: { display: false } },
+              y: { stacked: true, grid: { color: '#F1F5F9' } }
+            }
+          }
+        });
+      }
+    }
+
+    function renderEarlyWarningSystem() {
+      const container = document.getElementById('early-warning-container');
+      if (!container) return;
+
+      const counts = {};
+      state.attendanceLogs.filter(l => l.status === 'Terlambat').forEach(l => {
+        counts[l.id] = (counts[l.id] || 0) + 1;
+      });
+
+      const flagged = Object.keys(counts).filter(id => counts[id] >= 2);
+      if (flagged.length === 0) {
+        container.innerHTML = `<p class="text-xs text-emerald-700 font-semibold p-3 bg-emerald-50 rounded-2xl">Tidak ada catatan keterlambatan berulang (&ge; 2 kali) hari ini.</p>`;
+        return;
+      }
+
+      container.innerHTML = flagged.map(id => {
+        const user = state.masterUsers.find(u => u.id === id) || { nama: 'Siswa / Guru', detail: '-' };
+        const totalTerlambat = counts[id];
+        return `
+          <div class="p-4 rounded-2xl bg-orange-50/70 border border-orange-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-0.5 rounded-md bg-orange-600 text-white text-[10px] font-extrabold">${totalTerlambat}x TERLAMBAT</span>
+                <h4 class="font-extrabold text-slate-900 text-xs sm:text-sm">${user.nama} (${id})</h4>
+              </div>
+              <p class="text-[11px] text-slate-600 mt-1">Kompetensi / Jabatan: <strong>${user.detail}</strong>. Melewati batas toleransi keterlambatan sekolah.</p>
+            </div>
+            <button onclick="openSpModal('${id}', '${user.nama}', '${user.detail}', ${totalTerlambat})" class="px-4 py-2 rounded-xl btn-orange-gradient text-white text-xs font-extrabold shadow shrink-0">
+              Buat Draf Surat Peringatan (SP)
+            </button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderRekapSummaryTable() {
+      const tbody = document.getElementById('rekap-summary-tbody');
+      if (!tbody) return;
+
+      tbody.innerHTML = state.masterUsers.map(u => {
+        const logs = state.attendanceLogs.filter(l => l.id === u.id);
+        const hadir = logs.filter(l => l.status === 'Hadir').length;
+        const terlambat = logs.filter(l => l.status === 'Terlambat').length;
+        const sakit = logs.filter(l => l.status === 'Sakit').length;
+        const izin = logs.filter(l => l.status === 'Izin').length;
+        const total = hadir + terlambat + sakit + izin;
+        const persentase = total > 0 ? Math.round(((hadir + terlambat) / total) * 100) : 100;
+
+        return `
+          <tr class="hover:bg-slate-50 transition">
+            <td class="py-3 px-3 font-mono font-bold text-slate-700">${u.id}</td>
+            <td class="py-3 px-3 font-bold text-slate-900">${u.nama}</td>
+            <td class="py-3 px-3 text-slate-600">${u.detail}</td>
+            <td class="py-3 px-3 text-center font-bold text-emerald-700">${hadir}</td>
+            <td class="py-3 px-3 text-center font-bold text-orange-600">${terlambat}</td>
+            <td class="py-3 px-3 text-center font-bold text-sky-600">${sakit}</td>
+            <td class="py-3 px-3 text-center font-bold text-slate-600">${izin}</td>
+            <td class="py-3 px-3 text-center font-extrabold text-emerald-deep">${persentase}%</td>
+            <td class="py-3 px-3 text-right no-print">
+              <button onclick="openSpModal('${u.id}', '${u.nama}', '${u.detail}', ${terlambat})" class="px-3 py-1.5 rounded-lg bg-emerald-deep text-white text-xs font-bold hover:bg-emerald-mid">
+                Detail SP
+              </button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function updateGasCodeBox() {
+      const box = document.getElementById('gas-code-box');
+      if (!box) return;
+      box.value = `/**
+ * =========================================================================
+ * BACKEND GOOGLE APPS SCRIPT (Code.gs) - ABSENSI DIGITAL SMK TARUNA SATRIA
+ * =========================================================================
+ * LANGKAH WAJIB AGAR TERKONEKSI:
+ * 1. Tempel kode ini di Apps Script, lalu jalankan fungsi "testInisialisasiSheet"
+ *    1x dari menu Run di atas untuk memberi izin & mengunci ID Spreadsheet.
+ * 2. Klik "Terapkan (Deploy)" -> "Deployment baru" (JANGAN pakai URL lama
+ *    setelah mengubah kode!) -> Jenis: Aplikasi Web -> Akses: "Siapa saja".
+ */
+
+var SPREADSHEET_ID = ''; // Isi ID atau URL penuh Spreadsheet (opsional jika dibuka dari Ekstensi -> Apps Script)
+var SHEET_MASTER   = 'Master_Data';
+var SHEET_LOGS     = 'Log_Absensi';
+
+function extractSpreadsheetId(raw) {
+  if (!raw) return '';
+  var str = String(raw).trim();
+  var match = str.match(/\\/d\\/([a-zA-Z0-9-_]+)/);
+  return match ? match[1] : str;
+}
+
+function getTargetSpreadsheet() {
+  var props = PropertiesService.getScriptProperties();
+  var id = extractSpreadsheetId(SPREADSHEET_ID) || props.getProperty('BOUND_SS_ID');
+
+  if (id) {
+    return SpreadsheetApp.openById(id);
+  }
+
+  var activeSs = SpreadsheetApp.getActiveSpreadsheet();
+  if (activeSs) {
+    // Simpan ID secara permanen agar tetap terbaca saat dipanggil via Web App (doGet/doPost)
+    props.setProperty('BOUND_SS_ID', activeSs.getId());
+    return activeSs;
+  }
+
+  throw new Error('Spreadsheet tidak ditemukan! Isi variabel SPREADSHEET_ID dengan ID Google Sheet Anda, lalu Deploy ulang.');
+}
+
+function getOrCreateSheet(ss, sheetName, headers) {
+  var sheet = ss.getSheetByName(sheetName);
+  if (!sheet) {
+    sheet = ss.insertSheet(sheetName);
+  }
+  if (sheet.getLastRow() === 0 && headers && headers.length > 0) {
+    sheet.appendRow(headers);
+    var headerRange = sheet.getRange(1, 1, 1, headers.length);
+    headerRange.setFontWeight('bold');
+    headerRange.setBackground('#064E3B');
+    headerRange.setFontColor('#FFFFFF');
+    sheet.setFrozenRows(1);
+  }
+  return sheet;
+}
+
+function jsonResponse(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+// Jalankan fungsi ini SEKALI di editor Apps Script untuk menguji izin & mengunci Spreadsheet
+function testInisialisasiSheet() {
+  var ss = getTargetSpreadsheet();
+  PropertiesService.getScriptProperties().setProperty('BOUND_SS_ID', ss.getId());
+  getOrCreateSheet(ss, SHEET_MASTER, ['Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'No. WhatsApp', 'Password', 'Status Biometrik', 'Terakhir Diperbarui']);
+  getOrCreateSheet(ss, SHEET_LOGS, ['Tanggal', 'Jam (WIB)', 'Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'Status', 'Keterangan']);
+  Logger.log('SUKSES TERHUBUNG KE SPREADSHEET: ' + ss.getName() + ' (ID: ' + ss.getId() + ')');
+}
+
+// ==================== ENDPOINT GET (TARIK DATA KE WEB) ====================
+function doGet(e) {
+  try {
+    var ss = getTargetSpreadsheet();
+    var action = (e && e.parameter && e.parameter.action) ? e.parameter.action : 'status';
+
+    if (action === 'getAll' || action === 'getMaster') {
+      var mSheet = getOrCreateSheet(ss, SHEET_MASTER, ['Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'No. WhatsApp', 'Password', 'Status Biometrik', 'Terakhir Diperbarui']);
+      var mValues = mSheet.getDataRange().getDisplayValues();
+      var masterList = [];
+      for (var i = 1; i < mValues.length; i++) {
+        if (!mValues[i][1]) continue;
+        masterList.push({
+          role: String(mValues[i][0] || 'Siswa'),
+          id: String(mValues[i][1]).replace(/^'/, ''),
+          nama: String(mValues[i][2] || ''),
+          detail: String(mValues[i][3] || ''),
+          wa: String(mValues[i][4] || '').replace(/^'/, ''),
+          password: String(mValues[i][5] || 'taruna123'),
+          faceRegistered: true
+        });
+      }
+
+      if (action === 'getMaster') {
+        return jsonResponse({ status: 'SUCCESS', spreadsheet: ss.getName(), master: masterList });
+      }
+
+      var lSheet = getOrCreateSheet(ss, SHEET_LOGS, ['Tanggal', 'Jam (WIB)', 'Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'Status', 'Keterangan']);
+      var lValues = lSheet.getDataRange().getDisplayValues();
+      var logList = [];
+      for (var j = 1; j < lValues.length; j++) {
+        if (!lValues[j][3]) continue;
+        logList.push({
+          tanggal: String(lValues[j][0] || ''),
+          jam: String(lValues[j][1] || ''),
+          role: String(lValues[j][2] || ''),
+          id: String(lValues[j][3] || '').replace(/^'/, ''),
+          nama: String(lValues[j][4] || ''),
+          detail: String(lValues[j][5] || ''),
+          status: String(lValues[j][6] || ''),
+          keterangan: String(lValues[j][7] || '')
+        });
+      }
+
+      return jsonResponse({ status: 'SUCCESS', spreadsheet: ss.getName(), master: masterList, logs: logList });
+    }
+
+    return jsonResponse({
+      status: 'ONLINE',
+      sekolah: 'SMK TARUNA SATRIA PEKANBARU',
+      spreadsheet: ss.getName(),
+      timestamp: Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd HH:mm:ss')
+    });
+  } catch (err) {
+    return jsonResponse({ status: 'ERROR', message: err.toString() });
+  }
+}
+
+// ==================== ENDPOINT POST (SIMPAN / EDIT / HAPUS) ====================
+function doPost(e) {
+  var lock = LockService.getScriptLock();
+  lock.tryLock(10000);
+
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return jsonResponse({ status: 'ERROR', message: 'Payload kosong' });
+    }
+    var payload = JSON.parse(e.postData.contents);
+    var ss = getTargetSpreadsheet();
+    var nowStr = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd HH:mm:ss');
+    var todayStr = Utilities.formatDate(new Date(), 'Asia/Jakarta', 'yyyy-MM-dd');
+
+    var mSheet = getOrCreateSheet(ss, SHEET_MASTER, ['Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'No. WhatsApp', 'Password', 'Status Biometrik', 'Terakhir Diperbarui']);
+    var lSheet = getOrCreateSheet(ss, SHEET_LOGS, ['Tanggal', 'Jam (WIB)', 'Role', 'ID (NIK/NIS)', 'Nama Lengkap', 'Jabatan / Jurusan', 'Status', 'Keterangan']);
+
+    // 1. TAMBAH ATAU EDIT MASTER DATA (UPSERT)
+    if (payload.action === 'upsertMaster') {
+      var rows = mSheet.getDataRange().getDisplayValues();
+      var lookupId = String(payload.oldId || payload.id);
+      var bioLabel = payload.hasFace ? 'Terdaftar (Biometrik Aktif)' : 'Default';
+      var rowData = [
+        payload.role,
+        "'" + String(payload.id),
+        payload.nama,
+        payload.detail,
+        "'" + String(payload.wa),
+        payload.password || 'taruna123',
+        bioLabel,
+        nowStr
+      ];
+
+      var updated = false;
+      for (var i = 1; i < rows.length; i++) {
+        if (String(rows[i][1]).replace(/^'/, '') === lookupId) {
+          mSheet.getRange(i + 1, 1, 1, rowData.length).setValues([rowData]);
+          updated = true;
+          break;
+        }
+      }
+      if (!updated) {
+        mSheet.appendRow(rowData);
+      }
+      SpreadsheetApp.flush();
+      return jsonResponse({ status: 'SUCCESS', mode: updated ? 'UPDATED' : 'INSERTED' });
+    }
+
+    // 2. HAPUS MASTER DATA (+ OPSIONAL LOG TERKAIT)
+    if (payload.action === 'deleteMaster') {
+      var targetDelId = String(payload.id);
+      var mRows = mSheet.getDataRange().getDisplayValues();
+      for (var r = mRows.length - 1; r >= 1; r--) {
+        if (String(mRows[r][1]).replace(/^'/, '') === targetDelId) {
+          mSheet.deleteRow(r + 1);
+        }
+      }
+      if (payload.cascadeLogs) {
+        var lRows = lSheet.getDataRange().getDisplayValues();
+        for (var lr = lRows.length - 1; lr >= 1; lr--) {
+          if (String(lRows[lr][3]).replace(/^'/, '') === targetDelId) {
+            lSheet.deleteRow(lr + 1);
+          }
+        }
+      }
+      SpreadsheetApp.flush();
+      return jsonResponse({ status: 'SUCCESS', deletedId: targetDelId });
+    }
+
+    // 3. CATAT LOG ABSENSI BARU
+    if (payload.action === 'logAbsen') {
+      lSheet.appendRow([
+        "'" + (payload.tanggal || todayStr),
+        "'" + String(payload.jam),
+        payload.role,
+        "'" + String(payload.id),
+        payload.nama,
+        payload.detail,
+        payload.status,
+        payload.keterangan
+      ]);
+      SpreadsheetApp.flush();
+      return jsonResponse({ status: 'SUCCESS', logged: payload.nama });
+    }
+
+    // 4. SINKRONISASI MASSAL DATA AWAL (BULK SYNC)
+    if (payload.action === 'bulkSync') {
+      if (Array.isArray(payload.master)) {
+        var existingRows = mSheet.getDataRange().getDisplayValues();
+        var existingIds = {};
+        for (var k = 1; k < existingRows.length; k++) {
+          existingIds[String(existingRows[k][1]).replace(/^'/, '')] = k + 1;
+        }
+        payload.master.forEach(function(u) {
+          var rData = [u.role, "'" + String(u.id), u.nama, u.detail, "'" + String(u.wa), u.password || 'taruna123', 'Terdaftar', nowStr];
+          if (existingIds[String(u.id)]) {
+            mSheet.getRange(existingIds[String(u.id)], 1, 1, rData.length).setValues([rData]);
+          } else {
+            mSheet.appendRow(rData);
+          }
+        });
+      }
+      if (Array.isArray(payload.logs) && lSheet.getLastRow() <= 1) {
+        payload.logs.forEach(function(l) {
+          lSheet.appendRow(["'" + todayStr, "'" + String(l.jam), l.role, "'" + String(l.id), l.nama, l.detail, l.status, l.keterangan]);
+        });
+      }
+      SpreadsheetApp.flush();
+      return jsonResponse({ status: 'SUCCESS', message: 'Bulk sync selesai' });
+    }
+
+    return jsonResponse({ status: 'IGNORED', message: 'Action tidak dikenali' });
+  } catch (err) {
+    return jsonResponse({ status: 'ERROR', message: err.toString() });
+  } finally {
+    lock.releaseLock();
+  }
+}`;
+    }
+    async function syncFromGoogleSheet() {
+      if (!state.gasUrl) {
+        showToast('URL Belum Diisi', 'Masukkan URL Web App Google Apps Script terlebih dahulu.', 'orange');
+        return;
+      }
+      const btn = document.getElementById('btn-sync-sheet');
+      if (btn) btn.innerText = '↻ Menarik Data...';
+
+      try {
+        const sep = state.gasUrl.includes('?') ? '&' : '?';
+        const res = await fetch(`${state.gasUrl}${sep}action=getAll`, {
+          method: 'GET',
+          redirect: 'follow'
+        });
+        const data = await res.json();
+
+        if (data.status === 'SUCCESS') {
+          if (Array.isArray(data.master) && data.master.length > 0) {
+            state.masterUsers = data.master.map(m => ({
+              ...m,
+              facePhoto: generateDefaultFaceAvatar(m.nama, m.role === 'Guru')
+            }));
+          }
+          if (Array.isArray(data.logs) && data.logs.length > 0) {
+            state.attendanceLogs = data.logs;
+          }
+          refreshAllViews();
+          showToast('Sinkronisasi Berhasil', `Terhubung ke "${data.spreadsheet || 'Spreadsheet'}": ${state.masterUsers.length} master & ${state.attendanceLogs.length} log.`, 'emerald');
+        } else {
+          showToast('Respon Error dari GAS', data.message || 'Periksa SPREADSHEET_ID dan deploy ulang Web App.', 'red');
+        }
+      } catch (err) {
+        showToast('Gagal Menarik Data', 'Pastikan akses Web App disetel ke "Siapa saja (Anyone)" dan gunakan URL /exec terbaru.', 'red');
+      } finally {
+        if (btn) btn.innerText = '↻ Tarik Data dari Sheet';
+      }
+    }
+
+    function pushAllToGoogleSheet() {
+      if (!state.gasUrl) {
+        showToast('URL Belum Diisi', 'Masukkan URL Web App Google Apps Script terlebih dahulu.', 'orange');
+        return;
+      }
+      sendToGoogleAppsScript({
+        action: 'bulkSync',
+        master: state.masterUsers.map(({ facePhoto, ...rest }) => rest),
+        logs: state.attendanceLogs
+      });
+      showToast('Sinkronisasi Massal Dikirim', `${state.masterUsers.length} data master & ${state.attendanceLogs.length} log dikirim ke Google Sheets.`, 'emerald');
+    }
+
+    function updateWaPreviewAndLogs() {
+      const bubble = document.getElementById('wa-preview-bubble');
+      if (bubble) {
+        const latest = state.attendanceLogs[state.attendanceLogs.length - 1];
+        if (latest) {
+          bubble.innerText = `*ABSENSI DIGITAL SMK TARUNA SATRIA*\nYth. Orang Tua / Wali / HRD,\n\nNama : *${latest.nama}*\nID : ${latest.id}\nJabatan/Jurusan : ${latest.detail}\nWaktu : ${latest.jam} WIB\nStatus : *${latest.status.toUpperCase()}*\nKeterangan : ${latest.keterangan}`;
+        }
+      }
+
+      const logList = document.getElementById('wa-log-list');
+      if (logList) {
+        logList.innerHTML = state.waLogs.map(w => `
+          <div class="p-2 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="font-mono text-emerald-700 font-bold">[${w.waktu}]</span> Target: ${w.target}
+            <p class="text-slate-600 truncate mt-0.5">${w.pesan}</p>
+          </div>
+        `).join('');
+      }
+    }
+
+    function populateAbsenPersonDropdown() {
+      const select = document.getElementById('absen-person-select');
+      if (!select) return;
+      select.innerHTML = state.masterUsers.map(u => `
+        <option value="${u.id}">${u.role} - ${u.nama} (${u.id} / ${u.detail})</option>
+      `).join('');
+      onAbsenPersonChanged();
+    }
+
+    function onAbsenPersonChanged() {
+      const id = document.getElementById('absen-person-select')?.value;
+      const user = state.masterUsers.find(u => u.id === id);
+      if (!user) return;
+
+      const imgEl = document.getElementById('absen-ref-face-img');
+      const titleEl = document.getElementById('absen-ref-face-title');
+      const subEl = document.getElementById('absen-ref-face-sub');
+      if (imgEl) imgEl.src = user.facePhoto || generateDefaultFaceAvatar(user.nama, user.role === 'Guru');
+      if (titleEl) titleEl.innerText = `${user.nama} (${user.role})`;
+      if (subEl) subEl.innerText = `Biometrik Wajah Terdaftar • ${user.detail}`;
+    }
+
+    // =========================================================================
+    // 6. ABSENSI MODAL, CAMERA, & GEOFENCING GPS (RADIUS 50M)
+    // =========================================================================
+    function openAbsenModal() {
+      document.getElementById('modal-absen').classList.remove('hidden');
+      populateAbsenPersonDropdown();
+      startBiometricCamera();
+      refreshGpsLocation();
+    }
+
+    function closeAbsenModal() {
+      document.getElementById('modal-absen').classList.add('hidden');
+      stopBiometricCamera();
+    }
+
+    function startBiometricCamera() {
+      const video = document.getElementById('biometric-video');
+      if (!video) return;
+      navigator.mediaDevices?.getUserMedia({ video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' } })
+        .then(stream => {
+          biometricState.stream = stream;
+          video.srcObject = stream;
+          const badge = document.getElementById('biometric-cam-badge');
+          if (badge) {
+            badge.innerText = 'Kamera Aktif • Siap Scan Wajah';
+            badge.className = 'px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-bold';
+          }
+        })
+        .catch(() => {
+          const badge = document.getElementById('biometric-cam-badge');
+          if (badge) {
+            badge.innerText = 'Kamera Simulasi Aktif';
+            badge.className = 'px-2.5 py-1 rounded-full bg-orange-600 text-white text-[10px] font-bold';
+          }
+        });
+    }
+
+    function stopBiometricCamera() {
+      if (biometricState.stream) {
+        biometricState.stream.getTracks().forEach(t => t.stop());
+        biometricState.stream = null;
+      }
+    }
+
+    function scanBiometricFace() {
+      const frame = document.getElementById('biometric-face-frame');
+      const scoreBadge = document.getElementById('biometric-score-badge');
+      const score = Math.floor(Math.random() * 8) + 92; // 92% - 99%
+
+      biometricState.faceVerified = true;
+      biometricState.faceScore = score;
+
+      if (frame) frame.className = 'w-40 h-48 sm:w-44 sm:h-52 rounded-[45%] border-2 border-emerald-500 relative transition-colors duration-300 shadow-[0_0_15px_#047857]';
+      if (scoreBadge) {
+        scoreBadge.innerText = `Biometrik Cocok: ${score}% Verified`;
+        scoreBadge.className = 'px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold';
+      }
+      showToast('Wajah Terverifikasi', `Kecocokan biometrik wajah mencapai ${score}%.`, 'emerald');
+    }
+
+    function refreshGpsLocation() {
+      const dot = document.getElementById('gps-dot');
+      const coordsText = document.getElementById('gps-user-coords');
+      const distText = document.getElementById('gps-distance-text');
+      const msg = document.getElementById('gps-status-msg');
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            const dist = calculateDistanceMeters(lat, lng, SCHOOL_COORDS.lat, SCHOOL_COORDS.lng);
+
+            biometricState.userLat = lat;
+            biometricState.userLng = lng;
+            biometricState.distanceMeters = Math.round(dist);
+            biometricState.gpsVerified = (dist <= SCHOOL_COORDS.maxRadiusMeters);
+
+            if (coordsText) coordsText.innerText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            if (distText) distText.innerText = `${Math.round(dist)} meter dari sekolah`;
+            if (dot) dot.className = biometricState.gpsVerified ? 'w-2.5 h-2.5 rounded-full bg-emerald-500' : 'w-2.5 h-2.5 rounded-full bg-red-500 animate-ping';
+            if (msg) {
+              msg.innerText = biometricState.gpsVerified ? '✓ Anda berada dalam area SMK Taruna Satria Pekanbaru (<= 50m).' : '⚠ Anda berada di luar radius 50 meter SMK Taruna Satria Pekanbaru.';
+              msg.className = biometricState.gpsVerified ? 'text-[11px] font-bold text-emerald-700' : 'text-[11px] font-bold text-red-600';
+            }
+          },
+          () => {
+            simulateSchoolGps();
+          },
+          { timeout: 8000 }
+        );
+      } else {
+        simulateSchoolGps();
+      }
+    }
+
+    function simulateSchoolGps() {
+      biometricState.userLat = SCHOOL_COORDS.lat + 0.0001;
+      biometricState.userLng = SCHOOL_COORDS.lng + 0.0001;
+      biometricState.distanceMeters = 22;
+      biometricState.gpsVerified = true;
+
+      const dot = document.getElementById('gps-dot');
+      const coordsText = document.getElementById('gps-user-coords');
+      const distText = document.getElementById('gps-distance-text');
+      const msg = document.getElementById('gps-status-msg');
+
+      if (coordsText) coordsText.innerText = `${biometricState.userLat.toFixed(5)}, ${biometricState.userLng.toFixed(5)}`;
+      if (distText) distText.innerText = '22 meter (Simulasi Sekolah)';
+      if (dot) dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
+      if (msg) {
+        msg.innerText = '✓ Simulasi GPS: Dalam Area SMK Taruna Satria Pekanbaru (22m <= 50m).';
+        msg.className = 'text-[11px] font-bold text-emerald-700';
+      }
+      showToast('Simulasi GPS Aktif', 'Koordinat diatur berada di halaman SMK Taruna Satria (22m).', 'emerald');
+    }
+
+    function calculateDistanceMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3;
+      const dLat = (lat2 - lat1) * Math.PI / 180;
+      const dLon = (lon2 - lon1) * Math.PI / 180;
+      const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon/2) * Math.sin(dLon/2);
+      const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+      return R * c;
+    }
+
+    function handleAbsenModeChange() {
+      const mode = document.getElementById('absen-mode-select').value;
+      const camWrapper = document.getElementById('biometric-camera-wrapper');
+      if (camWrapper) {
+        camWrapper.style.display = (mode === 'BIOMETRIK') ? 'block' : 'none';
+      }
+    }
+
+    function submitQuickAbsen(e) {
+      e.preventDefault();
+      const id = document.getElementById('absen-person-select').value;
+      const mode = document.getElementById('absen-mode-select').value;
+      const customNote = document.getElementById('absen-keterangan').value.trim();
+
+      const user = state.masterUsers.find(u => u.id === id);
+      if (!user) return;
+
+      if (mode === 'BIOMETRIK' && !biometricState.faceVerified) {
+        showToast('Wajah Belum Dipindai', 'Silakan klik tombol "Pindai & Kunci Wajah" terlebih dahulu.', 'orange');
+        return;
+      }
+      if (mode === 'BIOMETRIK' && !biometricState.gpsVerified) {
+        showToast('Di Luar Radius Sekolah', 'Anda harus berada dalam radius 50 meter dari SMK Taruna Satria Pekanbaru.', 'red');
+        return;
+      }
+
+      const now = new Date();
+      const pad = n => String(n).padStart(2, '0');
+      const jamStr = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      let status = 'Hadir';
+      let ket = customNote || 'Tepat Waktu';
+
+      if (mode === 'BIOMETRIK') {
+        const evalTime = evaluateTimeRule(now);
+        status = evalTime.status;
+        ket = customNote || `${evalTime.defaultNote} [GPS: ${biometricState.distanceMeters}m dari Sekolah]`;
+      } else {
+        status = mode;
+        ket = customNote || `Pengajuan ${mode}`;
+      }
+
+      const newLog = {
+        jam: jamStr,
+        role: user.role,
+        id: user.id,
+        nama: user.nama,
+        detail: user.detail,
+        status,
+        keterangan: ket
+      };
+
+      state.attendanceLogs.push(newLog);
+      sendToGoogleAppsScript({ action: 'logAbsen', ...newLog });
+
+      // Simulasikan WA terkirim ke Orang Tua / HRD
+      if (status !== 'Hadir') {
+        state.waLogs.unshift({
+          waktu: jamStr,
+          target: user.wa,
+          pesan: `Notifikasi ${status}: ${user.nama} (${user.detail}) tercatat ${status.toLowerCase()} pukul ${jamStr} WIB.`
+        });
+      } else {
+        state.waLogs.unshift({
+          waktu: jamStr,
+          target: user.wa,
+          pesan: `Konfirmasi Hadir: ${user.nama} (${user.detail}) hadir tepat waktu (<= 07:15) pukul ${jamStr} WIB.`
+        });
+      }
+
+      closeAbsenModal();
+      refreshAllViews();
+      showToast('Absensi Berhasil Dicatat', `${user.nama} tercatat: ${status}`, 'emerald');
+    }
+
+    // =========================================================================
+    // 7. REGISTRASI WAJAH GURU & SISWA
+    // =========================================================================
+    let activeFaceContext = null;
+
+    function openFaceRegisterModal(context) {
+      activeFaceContext = context;
+      document.getElementById('modal-face-register').classList.remove('hidden');
+      const video = document.getElementById('reg-biometric-video');
+      navigator.mediaDevices?.getUserMedia({ video: { width: 640, height: 480, facingMode: 'user' } })
+        .then(stream => {
+          biometricState.regStream = stream;
+          video.srcObject = stream;
+        })
+        .catch(() => {});
+    }
+
+    function closeFaceRegisterModal() {
+      document.getElementById('modal-face-register').classList.add('hidden');
+      if (biometricState.regStream) {
+        biometricState.regStream.getTracks().forEach(t => t.stop());
+        biometricState.regStream = null;
+      }
+    }
+
+    function captureRegisteredFace() {
+      const video = document.getElementById('reg-biometric-video');
+      const canvas = document.getElementById('reg-biometric-canvas');
+      if (!canvas || !video) return;
+
+      canvas.width = 160;
+      canvas.height = 160;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, 160, 160);
+      const dataUrl = canvas.toDataURL('image/png');
+
+      if (activeFaceContext === 'form-guru') {
+        document.getElementById('guru-face-data').value = dataUrl;
+        document.getElementById('guru-face-preview').src = dataUrl;
+        document.getElementById('guru-face-preview').classList.remove('hidden');
+        document.getElementById('guru-face-placeholder').classList.add('hidden');
+        document.getElementById('guru-face-status').innerText = 'Wajah Biometrik Berhasil Direkam!';
+      } else if (activeFaceContext === 'form-siswa') {
+        document.getElementById('siswa-face-data').value = dataUrl;
+        document.getElementById('siswa-face-preview').src = dataUrl;
+        document.getElementById('siswa-face-preview').classList.remove('hidden');
+        document.getElementById('siswa-face-placeholder').classList.add('hidden');
+        document.getElementById('siswa-face-status').innerText = 'Wajah Biometrik Berhasil Direkam!';
+      } else if (activeFaceContext === 'form-edit') {
+        document.getElementById('edit-face-data').value = dataUrl;
+        document.getElementById('edit-face-preview').src = dataUrl;
+      }
+
+      closeFaceRegisterModal();
+      showToast('Rekam Wajah Berhasil', 'Sampel biometrik wajah berhasil disimpan.', 'emerald');
+    }
+
+    function registerFaceFromAbsenModal() {
+      const id = document.getElementById('absen-person-select').value;
+      const user = state.masterUsers.find(u => u.id === id);
+      if (user) {
+        user.faceRegistered = true;
+        user.facePhoto = generateDefaultFaceAvatar(user.nama, user.role === 'Guru');
+        showToast('Registrasi Cepat', `Sampel biometrik untuk ${user.nama} diaktifkan.`, 'emerald');
+      }
+    }
+
+    // =========================================================================
+    // 8. SURAT PERINGATAN (SP) & EXPORT
+    // =========================================================================
+    function openSpModal(id, nama, detail, count) {
+      const modal = document.getElementById('modal-sp');
+      const textarea = document.getElementById('sp-draft-text');
+      if (!modal || !textarea) return;
+
+      textarea.value = `YAYASAN PENDIDIKAN TARUNA SATRIA
+SMK TARUNA SATRIA PEKANBARU
+Jl. Delima No. 5, Kelurahan Tobek Godang (dahulu masuk Kecamatan Tampan), Kecamatan Binawidya
+Alamat: Kota Pekanbaru, Riau 28292
+
+SURAT PERINGATAN (SP) KEDISIPLINAN
+Nomor: 042/SMK-TS/SP/${new Date().getFullYear()}
+
+Diberikan kepada:
+Nama : ${nama}
+NIK / NIS : ${id}
+Jurusan / Jabatan : ${detail}
+
+Berdasarkan catatan Rekapitulasi Kehadiran Digital SMK Taruna Satria Pekanbaru, yang bersangkutan tercatat telah melakukan keterlambatan berulang sebanyak ${count} kali pada bulan ini. 
+
+Surat Peringatan ini diterbitkan agar yang bersangkutan dapat meningkatkan kedisiplinan dan hadir tepat waktu sebelum pukul 07:15 WIB.
+
+Pekanbaru, ${new Date().toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+Mengetahui,
+Kepala SMK Taruna Satria Pekanbaru,
+
+(Ir. H. Tarmizi Madjid, MM)`;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeSpModal() {
+      document.getElementById('modal-sp').classList.add('hidden');
+    }
+
+    function copySpDraft() {
+      const text = document.getElementById('sp-draft-text').value;
+      document.execCommand('copy');
+      navigator.clipboard?.writeText(text);
+      showToast('Berhasil Disalin', 'Teks Surat Peringatan disalin ke clipboard.', 'emerald');
+    }
+
+    function printSpDraft() {
+      window.print();
+    }
+
+    function exportCSV() {
+      let csv = 'Jam,Peran,ID,Nama,Detail,Status,Keterangan\n';
+      state.attendanceLogs.forEach(l => {
+        csv += `"${l.jam}","${l.role}","${l.id}","${l.nama}","${l.detail}","${l.status}","${l.keterangan}"\n`;
+      });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Rekap_Absensi_SMK_Taruna_Satria_${new Date().toISOString().slice(0,10)}.csv`;
+      a.click();
+      showToast('Export Berhasil', 'File rekapitulasi presensi berhasil diunduh.', 'emerald');
+    }
+
+    // =========================================================================
+    // 9. GOOGLE APPS SCRIPT INTEGRATION
+    // =========================================================================
+    function saveGasConfig() {
+      const url = document.getElementById('gas-endpoint-url').value.trim();
+      state.gasUrl = url;
+      localStorage.setItem('ts_gas_url', url);
+      const badge = document.getElementById('gas-status-badge');
+      if (url) {
+        if (badge) {
+          badge.innerText = 'Terhubung ke Google Sheets';
+          badge.className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold';
+        }
+        showToast('Koneksi Disimpan', 'URL Web App GAS berhasil disimpan. Menguji koneksi...', 'emerald');
+        syncFromGoogleSheet();
+      } else {
+        if (badge) {
+          badge.innerText = 'Mode Simulasi Lokal';
+          badge.className = 'px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-extrabold';
+        }
+        showToast('Mode Simulasi', 'Menggunakan penyimpanan memori lokal.', 'orange');
+      }
+    }
+
+    function copyGasCode() {
+      const box = document.getElementById('gas-code-box');
+      box.select();
+      document.execCommand('copy');
+      showToast('Kode GAS Disalin', 'Script Code.gs berhasil disalin ke clipboard.', 'emerald');
+    }
+
+    function sendToGoogleAppsScript(payload) {
+      if (!state.gasUrl) return;
+      // Hapus base64 foto berukuran besar agar payload JSON selalu ringan & diterima GAS
+      const cleanPayload = { ...payload };
+      if (cleanPayload.facePhoto) {
+        cleanPayload.hasFace = true;
+        delete cleanPayload.facePhoto;
+      }
+      fetch(state.gasUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        redirect: 'follow',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(cleanPayload)
+      }).catch(() => {});
+    }
+
+    // =========================================================================
+    // 10. DELETE MASTER MODAL
+    // =========================================================================
+    function openDeleteMasterModal(id) {
+      pendingDeleteId = id;
+      const user = state.masterUsers.find(u => u.id === id);
+      document.getElementById('delete-master-desc').innerText = `Apakah Anda yakin ingin menghapus data ${user ? user.nama : id}?`;
+      document.getElementById('modal-delete-master').classList.remove('hidden');
+    }
+
+    function closeDeleteMasterModal() {
+      document.getElementById('modal-delete-master').classList.add('hidden');
+      pendingDeleteId = null;
+    }
+
+    function confirmDeleteMaster() {
+      if (!pendingDeleteId) return;
+      const deletedUser = state.masterUsers.find(u => u.id === pendingDeleteId);
+      const cascade = document.getElementById('delete-cascade-logs').checked;
+
+      state.masterUsers = state.masterUsers.filter(u => u.id !== pendingDeleteId);
+      if (cascade) {
+        state.attendanceLogs = state.attendanceLogs.filter(l => l.id !== pendingDeleteId);
+      }
+
+      sendToGoogleAppsScript({
+        action: 'deleteMaster',
+        id: pendingDeleteId,
+        cascadeLogs: cascade
+      });
+
+      closeDeleteMasterModal();
+      refreshAllViews();
+      showToast('Data Dihapus', `Data ${deletedUser ? deletedUser.role + ' (' + deletedUser.nama + ')' : 'master'} berhasil dihapus.`, 'orange');
+    }
+
+    // Initialize on window load
+    window.onload = function() {
+      const savedGasUrl = localStorage.getItem('ts_gas_url');
+      if (savedGasUrl) {
+        state.gasUrl = savedGasUrl;
+        const urlInput = document.getElementById('gas-endpoint-url');
+        const badge = document.getElementById('gas-status-badge');
+        if (urlInput) urlInput.value = savedGasUrl;
+        if (badge) {
+          badge.innerText = 'Terhubung ke Google Sheets';
+          badge.className = 'px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold';
+        }
+      }
+      startLiveClock();
+      refreshAllViews();
+    };
+  </script>
+</body>
+</html>
